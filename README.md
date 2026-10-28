@@ -52,6 +52,21 @@ Copy the whole `stacks/ronny` directory into that directory, then open
 installed as soon as it is in that directory; press Space in the panel to
 enable or disable it.
 
+**Every stack, from the marketplace:**
+
+This repository is also a plugin marketplace, so you can install a stack
+without copying files and pick up updates later. In MiniMax Code desktop, open
+**Plugins**, choose **Add marketplace** and enter `MiniMax-AI/mcode-stack`; each
+stack then shows up as one plugin you can install, update or uninstall. Adding
+marketplaces is rolling out gradually, so your version may not have it yet.
+
+The same catalog works in Claude Code:
+
+```bash
+/plugin marketplace add MiniMax-AI/mcode-stack
+/plugin install ronny@mcode-stack
+```
+
 <details>
 <summary>More install options</summary>
 

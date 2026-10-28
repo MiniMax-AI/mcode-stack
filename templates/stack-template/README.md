@@ -15,4 +15,6 @@ Then:
 4. Rename `skills/example` and write your skills. List every skill in `skills`
    in `plugin.json`.
 5. Write `WORKFLOW.md`.
-6. Run `node scripts/check.mjs` from the repository root.
+6. Add an entry for the stack to `.claude-plugin/marketplace.json` at the
+   repository root (see CONTRIBUTING.md).
+7. Run `node scripts/check.mjs` from the repository root.

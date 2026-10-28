@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history, so the version bump check can find the merge base.
+          fetch-depth: 0
 
       - name: Fetch the official plugin validator from MiniMax Code
         uses: actions/checkout@v4
@@ -31,4 +34,6 @@ jobs:
       - name: Check all stacks
         env:
           MINIMAX_CODE_DIR: .minimax-code
+          # Empty on pushes to main, which skips the version bump check.
+          CHECK_BASE: ${{ github.event.pull_request.base.sha }}
         run: node scripts/check.mjs
