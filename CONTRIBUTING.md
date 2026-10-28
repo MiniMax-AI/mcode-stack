@@ -18,7 +18,12 @@
 2. **Copy the template** to `community/<id>/`. The `id` uses only lowercase
    letters, digits and hyphens, and must equal the `name` in
    `.minimax-plugin/plugin.json`.
-3. **Run the checks locally** and paste the output into the PR:
+3. **List it in the marketplace**: add an entry to
+   `.claude-plugin/marketplace.json` with `"name"` equal to the id,
+   `"source": "./community/<id>"` and the same `description` as your
+   `plugin.json`. Do not add `skills` or other component fields; your
+   `plugin.json` defines them.
+4. **Run the checks locally** and paste the output into the PR:
 
    ```bash
    node scripts/check.mjs
@@ -27,9 +32,17 @@
    MINIMAX_CODE_DIR=../minimax-code node scripts/check.mjs
    ```
 
-4. **Include a real usage record** in the PR: the task where the agent used
+5. **Include a real usage record** in the PR: the task where the agent used
    the skill, what the process looked like, and how it turned out. Show the
    process, not just the final result.
+
+## Changing a stack
+
+Whenever a PR changes anything inside a stack, raise `version` in its
+`.minimax-plugin/plugin.json` (for example `0.2.0` to `0.2.1`). People who
+installed the stack from the marketplace only get the update when the version
+goes up, so CI fails a change without a bump. Run the same check locally with
+`CHECK_BASE=origin/main node scripts/check.mjs`.
 
 ## How we review
 

@@ -12,7 +12,8 @@
 
 1. **先开一个「New stack」issue**，用几句话说清楚你是谁、怎么用 agent、打算放哪几样东西。
 2. **从模板复制**到 `community/<id>/`。`id` 只用小写字母、数字和连字符，并且要和 `.minimax-plugin/plugin.json` 里的 `name` 一致。
-3. **本地跑校验**，把输出贴进 PR：
+3. **登记到插件市场**：在 `.claude-plugin/marketplace.json` 里加一条，`"name"` 填 id，`"source"` 填 `"./community/<id>"`，`description` 和 `plugin.json` 里的保持一致。不要写 `skills` 等组件字段，这些由 `plugin.json` 定义。
+4. **本地跑校验**，把输出贴进 PR：
 
    ```bash
    node scripts/check.mjs
@@ -21,7 +22,11 @@
    MINIMAX_CODE_DIR=../minimax-code node scripts/check.mjs
    ```
 
-4. **PR 里附一段真实的使用记录**：agent 在什么任务里用了这个 Skill，过程是什么样，结果怎么样。不要只贴最终结果。
+5. **PR 里附一段真实的使用记录**：agent 在什么任务里用了这个 Skill，过程是什么样，结果怎么样。不要只贴最终结果。
+
+## 修改已有的 stack
+
+PR 只要改了某份 stack 里的文件，就要同时调高它 `.minimax-plugin/plugin.json` 里的 `version`（比如 `0.2.0` 改成 `0.2.1`）。从插件市场装的用户，只有版本号变高才会收到更新，所以不调版本号的改动 CI 会直接报错。本地可以用 `CHECK_BASE=origin/main node scripts/check.mjs` 跑同样的检查。
 
 ## 怎么审
 

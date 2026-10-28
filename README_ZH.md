@@ -42,6 +42,17 @@ mcode plugin marketplace list    # 查看本地插件目录
 
 把 `stacks/ronny` 整个目录复制到那个目录下，然后在 MiniMax Code 里打开 `/plugins`，按 `Ctrl+R` 刷新。本地插件放进去就算装好了，可以在面板里按空格启用或停用。
 
+**从插件市场安装：**
+
+这个仓库本身也是一个插件市场，不用复制文件就能装，之后有更新也能直接拿到。在 MiniMax Code 桌面端打开「插件」，点「添加市场」，填入 `MiniMax-AI/mcode-stack`，每份 stack 都会显示成一个插件，可以安装、更新或卸载。添加市场的功能正在逐步开放，你的版本可能还没有。
+
+Claude Code 也能用同一份目录：
+
+```bash
+/plugin marketplace add MiniMax-AI/mcode-stack
+/plugin install ronny@mcode-stack
+```
+
 <details>
 <summary>更多安装方式</summary>
 
