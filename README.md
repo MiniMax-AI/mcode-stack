@@ -149,6 +149,7 @@ it, and send your version back.
 
 ```text
 stacks/ronny/               Ronny's stack (MiniMax Code R&D lead), the first and most complete one
+stacks/jiachen/             Jiachen's stack: getting out of the agent loop, and turning notes into posts and videos
 stacks/<name>/              Other team members' stacks (on the way)
 notes/                      Which runnable piece goes with each Engineering Notes article
 community/                  Stacks contributed by developers outside the team

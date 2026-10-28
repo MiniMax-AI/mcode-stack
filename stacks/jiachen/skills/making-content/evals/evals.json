@@ -1,0 +1,63 @@
+{
+  "skill_name": "making-content",
+  "note": "expected_behavior describes a good run of the whole pipeline or of one revision step, not a single file. Prompts are in Chinese, as the user writes them.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "doc-to-douyin-first-draft",
+      "prompt": "把这篇调研笔记做成一个短视频，我想发抖音。需要我提供什么 api key 吗？",
+      "expected_behavior": [
+        "Asks one AskUserQuestion round before building: platform and length, voice, hook options drawn from the note, music, and what personal or employer information to keep out",
+        "Says in that first message what only the user can do (Volcengine voice clone, speaker id and API key) and that work proceeds with the free Edge voice meanwhile",
+        "Removes the private details the user names from the narration, captions and every on-screen text before anything is rendered",
+        "Writes script.json with a hook in line 0 and meta.hook, a 先说结论 line within about 15 s, spoken-style narration of roughly 430-450 字 for 90 s, and cap text with digits and '/' breaks",
+        "Rotates layouts with a new shot every 3-6 s, repeating a layout back to back only for a pair; English quotes carry a larger Chinese translation",
+        "Runs render.py --stills, looks at sheet.jpg with the Read tool, and loops lint.py until it prints 0 issue(s)",
+        "Renders a 1080x1920 mp4 under 30 MB at about -14 LUFS, checks it with ffprobe and ebur128, and sends it with the cover",
+        "Gives a description of about 400 字 with the conclusion, the sources and the music credit line, and adds no 下期预告 ending"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "switch-to-cloned-voice",
+      "prompt": "我在火山上创建了一个音色 S_Example123，还有一个临时的 api key 00000000-1111-2222-3333-444444444444，换成我的声音试试，先给我听个样本",
+      "expected_behavior": [
+        "Passes the key and speaker id through VOLC_TTS_API_KEY and VOLC_TTS_SPEAKER only; the key appears in no file, script or commit",
+        "Voices one representative line in 2-3 variants (speech_rate and the style instruction) and sends them for the user to choose before voicing the whole script",
+        "On 45000030 tells the user to enable 声音复刻 2.0 字符版 and grant the key; on 45000292 switches to the seed-icl-2.0 字符版 resource instead of retrying",
+        "Writes the cloned voice into a new --out directory so the approved Edge or earlier clips are not overwritten",
+        "Checks that identifiers such as rusty_v8 are not read as 杠, then rebuilds the timeline and mix with the new clips",
+        "Suggests revoking the temporary key once the video is final"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "too-dense-revision",
+      "prompt": "还是字体太密，有点眼花，字幕可以放得下面一些吗？多一些留白",
+      "expected_behavior": [
+        "Runs lint.py on the current timeline and reports which shots and captions fail and why before changing anything",
+        "Fixes failures with the text-density-lint table: shorter text, a second shot, context dimmed to texture, '/' moved in cap, rather than shrinking fonts below 34 px",
+        "Keeps captions at one line of at most 16 字 with the top at y 1380 or lower, and keeps the keyword sticker in the top zone",
+        "Where a frame becomes empty, adds motion (stickers, counter, bars, ambient shapes) instead of more words",
+        "Re-renders stills and shows the contact sheet before spending time on a full render",
+        "Ends with lint at 0 issue(s) and a re-rendered video"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "cut-a-90-second-version",
+      "prompt": "这个 3 分钟的视频发抖音太长了吧？你剪一个 90 秒的版本，另外把那个 biu 的音效去掉",
+      "expected_behavior": [
+        "Answers the length question directly: 抖音 favours a 75-95 s main cut, the 3 minute cut stays for 小红书 or B站",
+        "Writes a separate shortened script (about 430-450 字) that keeps the hook, the early conclusion and the strongest evidence, leaving the long version's files untouched",
+        "Voices only new or changed lines, into a new tts directory",
+        "Confirms the mix has no per-element pop sounds and only a soft whoosh on layout-type changes",
+        "Re-lints and renders the short cut, and reports its length, size and loudness"
+      ],
+      "files": []
+    }
+  ]
+}

@@ -7,6 +7,7 @@ MiniMax Code plugin package.
 | Stack | Owner | Status |
 | --- | --- | --- |
 | [`ronny`](ronny/) | Ronny, R&D lead | 15 skills, 5 checklists |
+| [`jiachen`](jiachen/) | Jiachen, engineer | 2 skills |
 
 More team members' stacks are on the way.
 

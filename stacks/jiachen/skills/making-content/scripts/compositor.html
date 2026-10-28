@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Short video compositor</title>
+<!-- Deterministic 1080x1920 frame renderer: render.py calls setup(timeline, captures) once, then render(t) per frame.
+     Asset paths are relative to the project dir: fonts/fonts.css, logos/<name>.png, shots/<capture>.png -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --yellow: #ffe14d; --ink: #111111; --paper: #f5f3ee; --dark: #121212; --cream: #fbf0df; --accent: #e0592a;
+  --sans: "Inter", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+  --serif: "Source Serif 4", "Noto Serif CJK SC", "Songti SC", serif;
+  --mono: "JetBrains Mono", "DejaVu Sans Mono", "Menlo", monospace;
+  --cjk: "Noto Sans CJK SC", "PingFang SC", "Source Han Sans SC", "Inter", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; font-family: var(--cjk); }
+.shot { position: absolute; inset: 0; overflow: hidden; display: none; }
+
+/* ---- chrome: progress bar, chip (chapter · source), transient title, hook, keyword sticker, captions ---- */
+#prog { position: absolute; top: 192px; left: 60px; right: 60px; z-index: 10; display: flex; gap: 10px; }
+#prog .seg { display: flex; flex-direction: column; }
+#prog .tr { height: 8px; border-radius: 4px; background: rgba(255,255,255,.35); box-shadow: 0 0 0 1.5px rgba(0,0,0,.35); overflow: hidden; }
+#prog .fl { height: 100%; background: var(--yellow); width: 0; }
+#chip { position: absolute; top: 216px; left: 60px; z-index: 10; font: 700 28px var(--cjk); color: #fff; background: rgba(0,0,0,.78); padding: 6px 16px; border-radius: 8px; }
+#chip b { color: var(--yellow); font-weight: 800; }
+#ttl { position: absolute; top: 272px; left: 0; right: 0; z-index: 10; text-align: center; }
+#ttl span { display: inline-block; font: 800 30px var(--cjk); color: #fff; background: rgba(0,0,0,.78); padding: 8px 22px; border-radius: 10px; }
+#ttl b { color: var(--yellow); }
+#hook { position: absolute; left: 0; right: 0; top: 520px; z-index: 11; padding: 40px 50px; background: rgba(0,0,0,.72); text-align: center; font: 900 86px/1.28 var(--cjk); color: #fff; }
+#hook em { font-style: normal; color: var(--yellow); }
+#kw { position: absolute; top: 330px; left: 0; right: 0; z-index: 9; display: flex; justify-content: center; align-items: center; gap: 22px; font: 900 104px var(--cjk); color: var(--yellow);
+  -webkit-text-stroke: 16px var(--ink); paint-order: stroke fill; text-shadow: 0 10px 0 rgba(0,0,0,.3); white-space: nowrap; }
+#cap { position: absolute; top: 1420px; left: 60px; right: 120px; z-index: 9; text-align: center; font: 900 56px var(--cjk); line-height: 1.3; white-space: nowrap;
+  color: #fff; -webkit-text-stroke: 11px #000; paint-order: stroke fill; }
+#cap em { font-style: normal; color: var(--yellow); }
+
+/* ---- stickers: real logos / mascots, drawn arrow (no text, so the lint ignores it) ---- */
+.stk { position: absolute; z-index: 8; display: flex; align-items: center; gap: 18px; }
+.tile { width: 132px; height: 132px; border-radius: 30px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.28), 0 0 0 4px rgba(0,0,0,.06); display: grid; place-items: center; overflow: hidden; flex: none; }
+.tile img { width: 100%; height: 100%; object-fit: cover; }
+.tile.wide img { object-fit: contain; padding: 10px; }
+#kw .tile { width: 120px; height: 120px; }
+.arr { display: inline-block; position: relative; width: 64px; height: 16px; background: var(--yellow); border-radius: 4px; box-shadow: 0 0 0 5px #111; margin: 0 22px 0 6px; }
+.arr::after { content: ""; position: absolute; right: -26px; top: -17px; border-left: 30px solid var(--yellow); border-top: 25px solid transparent; border-bottom: 25px solid transparent; filter: drop-shadow(4px 0 0 #111); }
+
+/* ---- ambient shapes that fill white space on solid backgrounds ---- */
+.fx { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 0; }
+.fx.ring { border: 10px solid currentColor; border-radius: 50%; }
+.fx.dot { background: currentColor; border-radius: 50%; }
+.fx.plus { background: linear-gradient(currentColor, currentColor) center/100% 22% no-repeat, linear-gradient(currentColor, currentColor) center/22% 100% no-repeat; }
+
+/* spot: real screenshot zoomed on one quote, the rest dimmed */
+.spot { background: #fff; }
+.spot .layer { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.spot .layer img { display: block; }
+.spot .mark { position: absolute; background: var(--yellow); mix-blend-mode: multiply; border-radius: 8px; transform-origin: left center; }
+.spot .band { position: absolute; border-radius: 14px; }
+.spot .ztr { position: absolute; left: 50px; right: 50px; top: 850px; z-index: 4; font: 800 58px/1.4 var(--cjk); color: #fff; text-align: center; background: rgba(12,12,12,.9); border-radius: 22px; padding: 26px 30px; box-shadow: 0 12px 40px rgba(0,0,0,.35); }
+.spot .ztr b { color: var(--yellow); }
+.tag { display: inline-block; font: 800 28px var(--cjk); color: #111; background: var(--yellow); border-radius: 6px; padding: 2px 10px; margin-right: 12px; vertical-align: 10px; }
+
+/* web: re-typeset article view (one Chinese line + one original line), sheet bleeding off three edges */
+.web .sheet { position: absolute; left: -8px; right: -8px; top: 350px; bottom: -40px; background: #fff; border-radius: 36px 36px 0 0; box-shadow: 0 -10px 60px rgba(0,0,0,.25); overflow: hidden; }
+.web .bar { height: 112px; display: flex; align-items: center; padding: 0 44px; border-bottom: 2px solid #ececec; }
+.web .url { flex: 1; height: 68px; border-radius: 34px; background: #f1f1f1; display: flex; align-items: center; gap: 14px; padding: 0 28px; font: 500 28px var(--sans); color: #444; white-space: nowrap; overflow: hidden; }
+.web .wm { position: absolute; right: -110px; top: 760px; width: 620px; height: 620px; border-radius: 140px; opacity: .09; }
+.web .body { padding: 190px 96px 0; display: flex; flex-direction: column; gap: 50px; }
+.web .zh1 { font: 900 96px/1.22 var(--cjk); color: #111; text-wrap: balance; }
+.web .en1 { font: 600 44px/1.35 var(--sans); color: #555; }
+.hl { background-image: linear-gradient(transparent 52%, var(--yellow) 52%, var(--yellow) 94%, transparent 94%); background-repeat: no-repeat; background-size: 0% 100%;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; color: #000; }
+
+/* pull: big translated quote first, original smaller underneath */
+.pull { display: flex; flex-direction: column; justify-content: center; padding: 0 120px 360px 70px; gap: 40px; }
+.pull.dark { background: #0b0b0b; color: #fff; } .pull.cream { background: var(--cream); color: #141414; }
+.pull::before { content: "\201C"; font: 900 260px/0.6 var(--serif); color: var(--yellow); height: 120px; order: -2; }
+.pull.cream::before { color: var(--accent); }
+.pull .zh { font: 900 100px/1.22 var(--cjk); color: var(--yellow); order: -1; }
+.pull.cream .zh { color: var(--accent); }
+.pull .en { font: 600 58px/1.2 var(--serif); letter-spacing: -.01em; opacity: .75; }
+.pull .en span { display: inline-block; margin-right: .26em; }
+
+/* card: one big statement, optional sub line / items */
+.card { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 18px; text-align: center; padding: 0 60px 420px; }
+.card.dark { background: var(--dark); color: #fff; }
+.card.yellow { background: var(--yellow); color: var(--ink); }
+.card .ln { font-weight: 900; line-height: 1.12; white-space: nowrap; }
+.card.dark .ln:nth-child(2 of .ln) { color: var(--yellow); }
+.card .ln.mono { font-family: var(--mono); font-weight: 700; }
+.card .sub { font-size: 50px; font-weight: 700; margin-top: 20px; opacity: .85; }
+.card .it { font-size: 66px; font-weight: 900; padding: 6px 28px; border-radius: 12px; background: var(--ink); color: var(--yellow); }
+.card > :not(.fx):not(.stk), .pull > :not(.fx):not(.stk), .counter > :not(.fx):not(.stk) { position: relative; z-index: 1; }
+
+/* code: real source lines; context lines dimmed to texture, key line highlighted */
+.code { background: #0d1117; color: #e6edf3; }
+.code .hd { position: absolute; top: 330px; left: 60px; right: 60px; }
+.code .repo { font: 700 44px var(--sans); color: #e6edf3; }
+.code .dim { opacity: .3; }                       /* owner + file path: attribution texture, not text to read */
+.code .file { font: 500 30px var(--mono); color: #7d8590; margin-top: 12px; }
+.code .lines { position: absolute; top: 560px; left: 30px; font: 400 42px/1.75 var(--mono); }
+.code .row { display: flex; white-space: pre; opacity: .3; }   /* context lines may bleed off the edge */
+.code .row.hl { opacity: 1; max-width: 930px; background: rgba(187,128,9,.28); box-shadow: inset 8px 0 0 var(--yellow); }
+.code .row.hl .tx { white-space: pre-wrap; }      /* the line to read wraps inside the safe zone */
+.code .no { width: 110px; text-align: right; padding-right: 26px; color: #6e7681; flex: none; }
+.k { color: #ff7b72; } .s { color: #a5d6ff; } .f { color: #d2a8ff; } .c2 { color: #79c0ff; }
+
+/* flow: three boxes, a token travels down and changes at the middle box */
+.flow { background: #0f1115; color: #fff; }
+.flow .node { position: absolute; left: 70px; right: 120px; border-radius: 22px; padding: 30px 40px; }
+.flow .node .t { display: block; font: 700 34px var(--cjk); color: #9aa3b2; margin-bottom: 10px; }
+.flow .node code { font: 500 38px var(--mono); white-space: nowrap; }
+.flow .n0 { top: 360px; border: 3px dashed #4b5568; }
+.flow .n1 { top: 720px; border: 4px solid var(--yellow); } .flow .n1 .t { color: var(--yellow); }
+.flow .n2 { top: 1060px; border: 3px solid #3fb950; } .flow .n2 code { color: #3fb950; }
+.flow .wire { position: absolute; left: 538px; width: 4px; top: 500px; height: 560px; background: repeating-linear-gradient(#4b5568 0 18px, transparent 18px 32px); }
+.flow .tok { position: absolute; left: 540px; transform: translate(-50%, -50%); font: 700 32px var(--mono); padding: 10px 22px; border-radius: 999px; white-space: nowrap; }
+
+/* stack: a ladder of items revealed on narration anchors */
+.stack { background: var(--dark); color: #fff; }
+.stack .ttl { position: absolute; top: 340px; left: 60px; font: 900 62px var(--cjk); }
+.stack .ttl b { color: var(--yellow); }
+.stack .rw { position: absolute; left: 0; height: 104px; display: flex; align-items: center; }
+.stack .bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 16px 16px 0; background: #2a2a2a; transform-origin: left; }
+.stack .lab { position: relative; padding-left: 60px; font: 900 48px var(--cjk); }
+.stack .rw.on .bar { background: var(--yellow); } .stack .rw.on .lab { color: var(--ink); }
+.stack .av { position: absolute; top: 14px; width: 76px; height: 76px; border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+.stack .av img { width: 100%; height: 100%; object-fit: cover; }
+
+/* vs / counter / bars: one number per row, label and value read as one block */
+.vs { background: var(--paper); color: var(--ink); }
+.vs .row { position: absolute; left: 0; right: 0; }
+.vs .blk { padding-left: 70px; }
+.vs .blk img { width: 64px; height: 64px; border-radius: 16px; vertical-align: -12px; margin-right: 18px; }
+.vs .lab { font: 800 46px var(--cjk); }
+.vs .val { font: 900 190px/1.05 var(--sans); letter-spacing: -.04em; }
+.vs .row.zero .val { color: #d62d20; }
+.vs .bar { height: 54px; background: var(--ink); margin-top: 24px; border-radius: 0 12px 12px 0; }
+.counter { background: var(--yellow); color: var(--ink); display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 420px; gap: 26px; }
+.counter .num { font: 800 176px/1 var(--sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.counter .lab { font: 800 52px var(--cjk); }
+.bars { background: var(--dark); color: #fff; }
+.bars .ttl { position: absolute; top: 400px; left: 60px; right: 60px; font: 900 60px var(--cjk); }
+.bars .hlab { position: absolute; left: 60px; font: 800 46px var(--cjk); color: #fff; }
+.bars .hlab b { color: var(--yellow); font-family: var(--sans); }
+.bars .hb { position: absolute; left: 0; height: 120px; border-radius: 0 20px 20px 0; background: #3a3a3a; display: flex; align-items: center; padding-left: 60px; }
+.bars .hb.last { background: var(--yellow); }
+.bars .hb img { width: 72px; height: 72px; border-radius: 16px; background: #fff; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="kw"></div>
+<div id="cap"></div>
+<div id="prog"></div>
+<div id="chip"></div>
+<div id="ttl"><span></span></div>
+<div id="hook"></div>
+<script>
+const clamp = (x, a = 0, b = 1) => Math.min(Math.max(x, a), b);
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const back = x => { x = clamp(x); const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+// [[x]] -> highlighted span; \n -> line break
+const mark = (s, tag = 'span class="hl"', close = 'span') => esc(s).replace(/\[\[(.*?)\]\]/g, `<${tag}>$1</${close}>`).replace(/\n/g, '<br>');
+const LOCK = '<svg width="26" height="30" viewBox="0 0 26 30"><rect x="2" y="12" width="22" height="16" rx="4" fill="#666"/><path d="M7 12V8a6 6 0 0 1 12 0v4" stroke="#666" stroke-width="3" fill="none"/></svg>';
+const WIDE = ['ferris'];   // non-square logos/mascots: contain-fit with padding instead of cropping to the square tile
+const tiles = L => L.map(n => n === '>' ? '<span class="arr"></span>' : `<div class="tile${WIDE.includes(n) ? ' wide' : ''}"><img src="logos/${n}.png"></div>`).join('');
+const STICKER_POS = { web: 'top:300px;right:34px', card: 'top:330px;left:0;right:0;justify-content:center', pull: 'top:330px;right:50px',
+  code: 'top:1190px;right:130px', counter: 'top:330px;left:0;right:0;justify-content:center' };
+let TL, IDX, CH = [], KEYS = null;
+
+function hiTS(line) {   // minimal TS/JS highlighter for the code layout
+  return esc(line).replace(/('[^']*'|"[^"]*")/g, '<span class="s">$1</span>')
+    .replace(/\b(import|export|const|let|function|from|type|return|if|await|async)\b/g, '<span class="k">$1</span>');
+}
+function build(sh) {
+  const el = document.createElement('div'); el.className = 'shot ' + sh.type; sh._el = el;
+  if (sh.type === 'spot') {
+    const info = IDX[`${sh.key}|${sh.phrase}`]; if (!info) throw new Error(`no capture for ${sh.key}|${sh.phrase} — run capture.py`);
+    const R = info.rects;
+    const x0 = Math.min(...R.map(r => r[0])), x1 = Math.max(...R.map(r => r[0] + r[2])), y0 = Math.min(...R.map(r => r[1])), y1 = Math.max(...R.map(r => r[1] + r[3]));
+    sh._box = [x0, y0, x1, y1]; sh._s = clamp(0.72 * 1080 / (x1 - x0), 0.5, 1.0);   // quote spans ~72% of the width; captures are 2x so 0.5 = fit
+    el.innerHTML = `<div class="layer"><img src="${info.file}">${R.map(r => `<div class="mark" style="left:${r[0]-10}px;top:${r[1]-4}px;width:${r[2]+20}px;height:${r[3]+8}px"></div>`).join('')}</div><div class="band"></div>` +
+      (sh.zh ? `<div class="ztr"><span class="tag">译</span>${mark(sh.zh, 'b', 'b')}</div>` : '');
+  } else if (sh.type === 'web') {
+    el.style.background = sh.bg || '#f38020';
+    el.innerHTML = `<div class="sheet">${sh.wm ? `<img class="wm" src="logos/${sh.wm}.png">` : ''}<div class="bar"><div class="url">${LOCK}<span>${esc(sh.url)}</span></div></div>
+      <div class="body"><div class="zh1">${mark(sh.zh1)}</div><div class="en1">“${mark(sh.en1)}”</div></div></div>`;
+  } else if (sh.type === 'pull') {
+    el.classList.add(sh.theme || 'dark');
+    el.innerHTML = `<div class="en">${sh.en.split(' ').map(w => `<span>${esc(w)}</span>`).join('')}</div><div class="zh">${mark(sh.zh)}</div>`;
+  } else if (sh.type === 'card') {
+    el.classList.add(sh.theme === 'yellow' ? 'yellow' : 'dark');
+    el.innerHTML = (sh.lines || []).map(t => `<div class="ln${sh.mono ? ' mono' : ''}">${esc(t)}</div>`).join('') +
+      (sh.items || []).map(t => `<div class="it">${esc(t)}</div>`).join('') + (sh.sub ? `<div class="sub">${esc(sh.sub)}</div>` : '');
+  } else if (sh.type === 'code') {
+    let prev = null, rows = '';
+    for (const [n, tx] of sh.lines) {
+      if (prev !== null && n - prev > 1) rows += `<div class="row"><span class="no">⋮</span><span class="tx"></span></div>`;
+      rows += `<div class="row${(sh.hl || []).includes(n) ? ' hl' : ''}"><span class="no">${n}</span><span class="tx">${hiTS(tx) || ' '}</span></div>`; prev = n;
+    }
+    const [owner, repo] = sh.path.split('/');
+    el.innerHTML = `<div class="hd" data-lint-group><div class="repo"><span class="dim">${esc(owner)} / </span>${esc(repo)}</div><div class="file dim">${esc(sh.file)}${sh.sha ? ' @ ' + esc(sh.sha) : ''}</div></div><div class="lines">${rows}</div>`;
+  } else if (sh.type === 'flow') {
+    el.innerHTML = `<div data-lint-group><div class="wire"></div>${sh.nodes.map((n, i) => `<div class="node n${i}"><span class="t">${esc(n.title)}</span><code>${esc(n.code)}</code></div>`).join('')}<div class="tok"></div></div>`;
+  } else if (sh.type === 'stack') {
+    el.innerHTML = `<div data-lint-group><div class="ttl">${mark(sh.title, 'b', 'b')}</div>` + sh.items.map((it, i) =>
+      `<div class="rw" style="top:${480 + i * 124}px;width:1080px"><div class="bar" style="width:${360 + i * 95}px"></div><div class="lab">${i + 1} · ${esc(it.label)}</div>${it.av ? `<div class="av" style="left:${380 + i * 95}px"><img src="logos/${it.av}.png"></div>` : ''}</div>`).join('') + '</div>';
+  } else if (sh.type === 'vs') {
+    el.innerHTML = sh.rows.map((r, i) => `<div class="row${r.frac === 0 ? ' zero' : ''}" style="top:${400 + i * 480}px"><div class="blk">${r.av ? `<img src="logos/${r.av}.png">` : ''}<span class="lab">${esc(r.label)}</span><br><span class="val">${esc(r.value)}</span></div><div class="bar" data-f="${r.frac}" style="width:0"></div></div>`).join('');
+  } else if (sh.type === 'counter') {
+    el.innerHTML = `<div class="num"></div><div class="lab">${esc(sh.label)}</div>`;
+  } else if (sh.type === 'bars') {
+    const max = Math.max(...sh.rows.map(r => r.v));
+    el.innerHTML = `<div class="ttl">${esc(sh.title)}</div>` + sh.rows.map((r, i) =>
+      `<div class="hlab" style="top:${560 + i * 300}px">${esc(r.name)}　<b>${esc(r.v)}${esc(sh.unit ?? '%')}</b></div><div class="hb${i === sh.rows.length - 1 ? ' last' : ''}" style="top:${630 + i * 300}px" data-f="${r.v / max}">${r.logo ? `<img src="logos/${r.logo}.png">` : ''}</div>`).join('');
+  } else throw new Error('unknown layout ' + sh.type);
+  if (sh.logos && sh.type !== 'spot') {
+    const st = document.createElement('div'); st.className = 'stk'; st.innerHTML = tiles(sh.logos);
+    st.style.cssText = STICKER_POS[sh.type] || 'top:330px;right:130px'; el.appendChild(st); sh._stk = [...st.children];
+  }
+  document.getElementById('stage').appendChild(el);
+}
+function fitCards() {   // one hero size per card, widest line fits 840px (inside the right-rail safe zone)
+  TL.shots.filter(s => s.type === 'card').forEach(sh => {
+    sh._el.style.display = 'flex'; const ls = [...sh._el.querySelectorAll('.ln')]; let m = 999;
+    ls.forEach(p => { let fs = sh.lines.length > 2 ? 120 : 170; p.style.fontSize = fs + 'px'; while (p.scrollWidth > 840 && fs > 40) { fs -= 4; p.style.fontSize = fs + 'px'; } m = Math.min(m, fs); });
+    ls.forEach(p => { p.style.fontSize = m + 'px'; }); sh._el.style.display = 'none';
+  });
+}
+function animStickers(items, lt, t0) {
+  items.forEach((s, k) => { const a = t0 + k * 0.14, q = back((lt - a) / 0.32), rot = ((k * 37) % 13) - 6;
+    s.style.opacity = lt >= a ? 1 : 0; s.style.transform = `translateY(${Math.sin((lt + k) * 2.2) * 5}px) rotate(${rot * q}deg) scale(${lt >= a ? 0.3 + 0.7 * q : 0.3})`; });
+}
+function ambient(el, sh, t) {   // slow drifting rings/dots/plus signs on solid backgrounds
+  if (!['card', 'pull', 'counter', 'vs', 'bars', 'stack'].includes(sh.type)) return;
+  if (!el._fx) { el._fx = []; const light = sh.theme === 'yellow' || sh.type === 'counter' || sh.type === 'vs' || sh.theme === 'cream';
+    for (let i = 0; i < 9; i++) { const f = document.createElement('div'); f.className = 'fx ' + ['ring', 'dot', 'plus'][i % 3];
+      f.style.color = light ? 'rgba(17,17,17,.10)' : (i % 2 ? 'rgba(255,225,77,.22)' : 'rgba(255,255,255,.10)');
+      f._x = (i * 197) % 1000 + 20; f._y = 320 + (i * 311) % 1050; f._s = 40 + (i * 53) % 120; f._p = i * 1.7;
+      f.style.width = f.style.height = f._s + 'px'; el.insertBefore(f, el.firstChild); el._fx.push(f); } }
+  el._fx.forEach(f => { f.style.transform = `translate(${f._x + Math.sin(t * 0.5 + f._p) * 30}px, ${f._y + Math.cos(t * 0.4 + f._p) * 40}px) rotate(${t * 20 + f._p * 40}deg)`; });
+}
+function render(t) {
+  let cur = TL.shots.findIndex(s => t >= s.start && t < s.end); if (cur < 0) cur = t < TL.shots[0].end ? 0 : TL.shots.length - 1;
+  TL.shots.forEach((s, i) => { s._el.style.display = i === cur ? (['card', 'counter', 'pull'].includes(s.type) ? 'flex' : 'block') : 'none'; });
+  const sh = TL.shots[cur], el = sh._el, lt = t - sh.start, d = sh.end - sh.start, first = cur === 0;
+  const hookOn = !!TL.meta.hook, hookEnd = hookOn ? 1.6 : 0;
+  // chrome
+  document.getElementById('chip').innerHTML = `<b>${esc(sh.chapter)}</b>${sh.src ? ' · ' + esc(sh.src) : ''}`;
+  const ch = CH.find(c => t >= c.s && t < c.e) || CH[0], t0 = ch === CH[0] ? hookEnd + 0.1 : ch.s;
+  const chShot = TL.shots.find(s => s.start >= ch.s - 0.01), tl2 = (ch === CH[0] || (chShot && chShot.type === 'card')) ? t - t0 : -1;
+  const tt = document.getElementById('ttl'); tt.style.opacity = TL.meta.title && tl2 >= 0 && tl2 < 2.4 ? Math.min(ease(tl2 / 0.3), 1 - ease((tl2 - 2.0) / 0.4)) : 0;
+  CH.forEach(c => { c.fl.style.width = clamp((t - c.s) / (c.e - c.s)) * 100 + '%'; });
+  const hk = document.getElementById('hook'), hq = hookOn ? 1 - ease((t - (hookEnd - 0.05)) / 0.3) : 0; hk.style.opacity = hq; hk.style.display = hq > 0 ? 'block' : 'none';
+  ambient(el, sh, t);
+  const kw = document.getElementById('kw'), kwAt = first ? hookEnd + 0.15 : 0.7;
+  if (kw._shot !== cur) { kw.innerHTML = sh.kw ? (sh.logos ? tiles(sh.logos) : '') + `<span>${esc(sh.kw)}</span>` : ''; kw._shot = cur; }
+  const kp = back((lt - kwAt) / 0.28); kw.style.opacity = sh.kw && lt >= kwAt ? 1 : 0; kw.style.transform = `rotate(-3deg) scale(${0.6 + 0.4 * kp})`;
+  if (sh._stk) animStickers(sh._stk, lt, first ? 0 : 0.45);
+  // layouts
+  if (sh.type === 'spot') {
+    const [x0, y0, x1, y1] = sh._box, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const s = sh._s * (first ? 1 : 0.86 + 0.14 * ease(lt / 0.5)) * (1 + 0.05 * ease(lt / Math.max(d, 1)));
+    const tx = 540 - cx * s, ty = 720 - cy * s;
+    el.querySelector('.layer').style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+    const ms = el.querySelectorAll('.mark'), a0 = first ? 0 : 0.35;
+    ms.forEach((m, k) => { const a = a0 + k * 0.45 / ms.length; m.style.opacity = .6; m.style.transform = `scaleX(${clamp((lt - a) / (0.45 / ms.length))})`; });
+    const ztr = el.querySelector('.ztr'); if (ztr) { const q = ease((lt - (first ? hookEnd + 0.3 : 0.7)) / 0.4); ztr.style.opacity = q; ztr.style.transform = `translateY(${(1 - q) * 24}px)`; }
+    const dim = first ? 0.62 : 0.62 * ease((lt - 0.15) / 0.4);
+    Object.assign(el.querySelector('.band').style, { left: x0 * s + tx - 24 + 'px', top: y0 * s + ty - 18 + 'px', width: (x1 - x0) * s + 48 + 'px', height: (y1 - y0) * s + 36 + 'px', boxShadow: `0 0 0 3000px rgba(0,0,0,${dim})` });
+  } else if (sh.type === 'web') {
+    const p = ease(lt / 0.35), sheet = el.querySelector('.sheet'), wm = el.querySelector('.wm');
+    sheet.style.transform = `translateY(${(1 - p) * 220}px) scale(${1 + 0.035 * ease(lt / Math.max(d, 1))})`; sheet.style.transformOrigin = '50% 30%'; sheet.style.opacity = clamp(lt / 0.2);
+    if (wm) wm.style.transform = `rotate(${-12 + lt * 4}deg) scale(${1 + 0.04 * Math.sin(lt * 1.3)})`;
+    const z = el.querySelector('.zh1'); z.style.opacity = ease((lt - 0.25) / 0.4); z.style.transform = `translateY(${(1 - ease((lt - 0.25) / 0.4)) * 40}px)`;
+    el.querySelector('.en1').style.opacity = ease((lt - 0.6) / 0.4);
+    el.querySelectorAll('.hl').forEach((h, k) => { h.style.backgroundSize = `${100 * ease((lt - 0.45 - k * 0.2) / 0.6)}% 100%`; });
+  } else if (sh.type === 'pull') {
+    el.querySelector('.zh').style.opacity = ease((lt - 0.15) / 0.35);
+    el.querySelectorAll('.en span').forEach((w, k) => { const q = ease((lt - 0.6 - k * 0.08) / 0.3); w.style.opacity = q; w.style.transform = `translateY(${(1 - q) * 30}px)`; });
+  } else if (sh.type === 'card') {
+    const parts = [...el.children].filter(p => !p.classList.contains('fx') && !p.classList.contains('stk')), n = parts.length;
+    const span = Math.min(d * 0.65, 0.35 * n + (sh.items ? d * 0.4 : 0));
+    parts.forEach((p, k) => { const a = n > 1 ? k * span / (n - 1) : 0, q = back((lt - a) / 0.25); p.style.opacity = lt >= a ? 1 : 0; p.style.transform = `scale(${lt >= a ? 0.7 + 0.3 * q : 0.7})`; });
+  } else if (sh.type === 'code') {
+    el.querySelectorAll('.row.hl').forEach((r, k) => { r.style.boxShadow = lt > 0.6 + k * 1.2 ? '' : 'none'; r.style.background = lt > 0.6 + k * 1.2 ? '' : 'transparent'; });
+  } else if (sh.type === 'flow') {
+    el.querySelectorAll('.node').forEach((n, k) => { n.style.opacity = clamp((lt - k * 0.25) / 0.3); });
+    const p = ease((lt - 0.6) / Math.max(1.5, d - 1.6)), y = 640 + p * 345, tok = el.querySelector('.tok'), after = y > 880;
+    tok.style.top = y + 'px'; tok.style.opacity = lt > 0.6 ? 1 : 0; tok.textContent = after ? sh.token.after : sh.token.before;
+    Object.assign(tok.style, after ? { background: '#3fb950', color: '#0f1115' } : { background: '#2a303b', color: '#cfd6e2' });
+  } else if (sh.type === 'stack') {
+    const rws = el.querySelectorAll('.rw');
+    sh.items.forEach((it, k) => { const r = rws[k], l2 = t - it.at; r.style.opacity = l2 >= 0 ? 1 : 0;
+      r.querySelector('.bar').style.transform = `scaleX(${l2 >= 0 ? clamp(0.4 + 0.6 * ease(l2 / 0.35)) : 0})`;
+      const av = r.querySelector('.av'); if (av) av.style.transform = `scale(${l2 >= 0.15 ? back((l2 - 0.15) / 0.3) : 0})`;
+      const next = sh.items[k + 1]; r.classList.toggle('on', l2 >= 0 && (!next || t < next.at)); });
+  } else if (sh.type === 'vs') {
+    el.querySelectorAll('.row').forEach((r, k) => { const a = k * 1.4, b = r.querySelector('.bar'); r.style.opacity = lt >= a ? 1 : 0;
+      b.style.width = (b.dataset.f === '0' ? 8 : 1100 * +b.dataset.f * ease((lt - a - 0.1) / 0.6)) + 'px'; });
+  } else if (sh.type === 'counter') {
+    el.querySelector('.num').textContent = (sh.prefix || '') + Math.round(sh.value * ease(lt / 1.1)).toLocaleString('en-US');
+  } else if (sh.type === 'bars') {
+    el.querySelectorAll('.hb').forEach((b, k) => { const a = 0.3 + k * 0.9, p = ease((lt - a) / 0.7); b.style.opacity = b.previousElementSibling.style.opacity = lt >= a ? 1 : 0;
+      b.style.width = (140 + 760 * +b.dataset.f * p) + 'px'; });
+  }
+  const c = TL.cues.find(c => t >= c.s && t < c.e + 0.12);
+  document.getElementById('cap').innerHTML = c ? (KEYS ? esc(c.text).replace(KEYS, '<em>$1</em>') : esc(c.text)) : '';
+}
+window.setup = async (tl, idx) => {
+  TL = tl; IDX = idx || {}; TL.meta = TL.meta || {};
+  TL.shots.forEach(build);
+  if (TL.meta.hook) document.getElementById('hook').innerHTML = mark(TL.meta.hook, 'em', 'em');
+  if (TL.meta.title) document.querySelector('#ttl span').innerHTML = mark(TL.meta.title, 'b', 'b');
+  const kws = (TL.meta.keywords || []).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).sort((a, b) => b.length - a.length);
+  KEYS = new RegExp(`(\\$?\\d[\\d,.]*\\s?(?:%|亿美元|美元|万|亿|天|行|万行|月|号|档|家|倍)?${kws.length ? '|' + kws.join('|') : ''})`, 'g');
+  const names = []; TL.shots.forEach(s => { if (!names.includes(s.chapter)) names.push(s.chapter); });
+  CH = names.map(n => { const ss = TL.shots.filter(s => s.chapter === n); return { n, s: ss[0].start, e: ss[ss.length - 1].end }; });
+  const prog = document.getElementById('prog');
+  CH.forEach(c => { const el = document.createElement('div'); el.className = 'seg'; el.style.flex = String(c.e - c.s);
+    el.innerHTML = '<div class="tr"><div class="fl"></div></div>'; prog.appendChild(el); c.fl = el.querySelector('.fl'); });
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  await document.fonts.ready; fitCards(); render(0); return true;
+};
+</script>
+</body>
+</html>

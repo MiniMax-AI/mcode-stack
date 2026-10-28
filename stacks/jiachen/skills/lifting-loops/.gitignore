@@ -1,0 +1,3 @@
+# Ledger, cursors, run digests and the machine config hold private session
+# and journal content. They sync through iCloud but never reach git.
+private/

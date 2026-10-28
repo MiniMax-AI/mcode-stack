@@ -1,0 +1,230 @@
+{
+ "meta": {
+  "title": "大厂为啥都在抢 [[JS 运行时]]？",
+  "hook": "一分钱没赚的公司\n凭啥被 [[Anthropic]]\n买下了？",
+  "keywords": [
+   "Anthropic",
+   "Cloudflare",
+   "Claude Code",
+   "Bun",
+   "Deno",
+   "JS 运行时",
+   "大脑"
+  ]
+ },
+ "lines": [
+  {
+   "n": "一家一分钱都没赚的公司，Anthropic 为啥非买不可？",
+   "cap": "一家一分钱都没赚的公司/Anthropic 为啥非买不可？",
+   "chapter": "收购",
+   "shots": [
+    {
+     "type": "spot",
+     "key": "bun_joins",
+     "phrase": "Today, Bun makes $0 in revenue.",
+     "kw": "收入 $0",
+     "logos": [
+      "oven-sh"
+     ],
+     "src": "bun.com/blog"
+    }
+   ]
+  },
+  {
+   "n": "它叫 Bun，是个 JavaScript 运行时。",
+   "cap": "它叫 Bun/是个 JavaScript 运行时。",
+   "chapter": "收购",
+   "shots": [
+    {
+     "type": "web",
+     "url": "bun.com/blog",
+     "bg": "#fbf0df",
+     "wm": "oven-sh",
+     "zh1": "Bun 被 [[Anthropic]]\n收购了",
+     "en1": "[[Bun is joining Anthropic]]",
+     "logos": [
+      "oven-sh",
+      ">",
+      "anthropics"
+     ]
+    }
+   ]
+  },
+  {
+   "n": "先说结论：一个买的是大脑，一个买的是手。",
+   "cap": "先说结论：一个买的是大脑/一个买的是手。",
+   "chapter": "收购",
+   "shots": [
+    {
+     "type": "card",
+     "theme": "yellow",
+     "lines": [
+      "一个买大脑",
+      "一个买手"
+     ]
+    }
+   ]
+  },
+  {
+   "n": "Bun 自己说得很直白：Bun 挂了，Claude Code 也就挂了。",
+   "cap": "Bun 自己说得很直白：Bun 挂了/Claude Code 也就挂了。",
+   "chapter": "Bun",
+   "shots": [
+    {
+     "type": "pull",
+     "theme": "cream",
+     "zh": "Bun 挂了\nClaude Code\n也就挂了",
+     "en": "If Bun breaks, Claude Code breaks.",
+     "src": "bun.com/blog",
+     "logos": [
+      "oven-sh"
+     ]
+    }
+   ]
+  },
+  {
+   "n": "一个年化收入十亿美元的产品，压在一家零收入的创业公司身上。",
+   "cap": "一个年化收入/10亿美元的产品/压在一家/零收入的创业公司身上。",
+   "chapter": "Bun",
+   "shots": [
+    {
+     "type": "vs",
+     "rows": [
+      {
+       "label": "Claude Code 年化收入",
+       "value": "$1B",
+       "frac": 1,
+       "av": "anthropics"
+      },
+      {
+       "label": "Bun 被收购时的收入",
+       "value": "$0",
+       "frac": 0,
+       "av": "oven-sh"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "n": "一个 PR 加了一百多万行代码，结果 CPU 占用直接砍掉一半多。",
+   "cap": "一个 PR/加了100多万行代码/结果 CPU 占用/直接砍掉一半多。",
+   "chapter": "Bun",
+   "shots": [
+    {
+     "type": "counter",
+     "value": 1000000,
+     "prefix": "+",
+     "label": "一个 PR 新增的代码行数",
+     "src": "simonwillison.net",
+     "logos": [
+      "github"
+     ]
+    },
+    {
+     "type": "bars",
+     "anchor": "CPU",
+     "title": "Claude Code CPU 占用",
+     "rows": [
+      {
+       "name": "Zig 版 Bun",
+       "v": 24,
+       "logo": "ziglang"
+      },
+      {
+       "name": "Rust 版 Bun",
+       "v": 10,
+       "logo": "ferris"
+      }
+     ],
+     "src": "bun.com/blog"
+    }
+   ]
+  },
+  {
+   "n": "现在的 agent 沙箱从轻到重：解释器、V8 isolate、容器、microVM。",
+   "cap": "现在的 agent 沙箱从轻到重/解释器、V8 isolate、容器、microVM。",
+   "chapter": "沙箱",
+   "shots": [
+    {
+     "type": "stack",
+     "title": "agent 沙箱 · [[从轻到重]]",
+     "items": [
+      {
+       "label": "解释器",
+       "av": "pydantic",
+       "anchor": "解释器"
+      },
+      {
+       "label": "V8 isolate",
+       "av": "cloudflare",
+       "anchor": "V8"
+      },
+      {
+       "label": "容器",
+       "av": "google",
+       "anchor": "容器"
+      },
+      {
+       "label": "microVM",
+       "av": "firecracker-microvm",
+       "anchor": "microVM"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "n": "比如沙箱里的密钥只是一串 fake value，请求出门时，代理才换回真值。",
+   "cap": "比如沙箱里的密钥/只是一串 fake_value_/请求出门时/代理才换回真值。",
+   "chapter": "沙箱",
+   "shots": [
+    {
+     "type": "code",
+     "path": "anthropic-experimental/sandbox-runtime",
+     "file": "src/sandbox/credential-sentinel.ts",
+     "sha": "85af865",
+     "lines": [
+      [
+       13,
+       "import type { SentinelBufferPair } from './body-substitution.js'"
+      ],
+      [
+       15,
+       "export const SENTINEL_PREFIX = 'fake_value_'"
+      ],
+      [
+       31,
+       "  const base = SENTINEL_PREFIX + randomUUID()"
+      ]
+     ],
+     "hl": [
+      15
+     ]
+    },
+    {
+     "type": "flow",
+     "anchor": "请求出门",
+     "nodes": [
+      {
+       "title": "沙箱里",
+       "code": "fake_value_…"
+      },
+      {
+       "title": "出口代理",
+       "code": "白名单域名才换"
+      },
+      {
+       "title": "API 收到",
+       "code": "真 token"
+      }
+     ],
+     "token": {
+      "before": "fake_value_…",
+      "after": "真 token"
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+# pip install -r requirements.txt && python3 -m playwright install chromium
+# System: ffmpeg + ffprobe on PATH; a CJK font (PingFang SC on macOS, Noto Sans CJK SC on Linux)
+playwright
+edge-tts
+aiohttp
+numpy
+soundfile
+requests
+Pillow

@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>cover</title>
+<!-- Edit the text, logos and background below, then: python3 render.py --cover cover.html --out cover.png
+     Everything that matters sits inside the centre 3:4 band (y 240-1680): profile grids crop covers to 3:4. -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root { --y: #ffe14d; --ink: #111; --cjk: "Noto Sans CJK SC", "PingFang SC", sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #111; font-family: var(--cjk); }
+.bg { position: absolute; inset: 0; background: url(shots/00.png) center 30% / 1500px auto no-repeat; filter: blur(7px) brightness(.38); transform: scale(1.05); }
+.shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15) 40%, rgba(0,0,0,.75)); }
+.tag { position: absolute; top: 330px; left: 70px; font: 800 40px var(--cjk); color: var(--ink); background: var(--y); padding: 8px 22px; border-radius: 10px; transform: rotate(-2deg); }
+.t { position: absolute; top: 430px; left: 70px; right: 60px; font: 900 110px/1.2 var(--cjk); color: #fff; -webkit-text-stroke: 14px #000; paint-order: stroke fill; }
+.t em { font-style: normal; color: var(--y); }
+.logos { position: absolute; top: 900px; left: 70px; right: 70px; display: flex; flex-direction: column; gap: 26px; }
+.row { display: flex; align-items: center; gap: 22px; }
+.tile { width: 150px; height: 150px; border-radius: 34px; background: #fff; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,.45); }
+.tile img { width: 100%; height: 100%; object-fit: cover; }
+.arr { width: 70px; height: 18px; background: var(--y); border-radius: 4px; box-shadow: 0 0 0 5px #000; position: relative; margin-right: 26px; }
+.arr::after { content: ""; position: absolute; right: -28px; top: -17px; border-left: 32px solid var(--y); border-top: 26px solid transparent; border-bottom: 26px solid transparent; }
+.cap { font: 900 54px var(--cjk); color: #fff; -webkit-text-stroke: 9px #000; paint-order: stroke fill; margin-left: 10px; }
+.bot { position: absolute; top: 1420px; left: 0; right: 0; background: var(--y); color: var(--ink); text-align: center; font: 900 66px var(--cjk); padding: 26px 0; }
+</style></head><body>
+<div class="bg"></div><div class="shade"></div>
+<div class="tag">大厂收购拆解</div>
+<div class="t">一分钱没赚的公司<br>凭啥被 <em>Anthropic</em><br>买下了？</div>
+<div class="logos">
+  <div class="row"><div class="tile"><img src="logos/oven-sh.png"></div><span class="arr"></span><div class="tile"><img src="logos/anthropics.png"></div><span class="cap">Bun 收入 $0</span></div>
+  <div class="row"><div class="tile"><img src="logos/denoland.png"></div><span class="arr"></span><div class="tile"><img src="logos/cloudflare.png"></div><span class="cap">整个团队打包</span></div>
+</div>
+<div class="bot">大厂为啥都在抢 JS 运行时？</div>
+</body></html>
