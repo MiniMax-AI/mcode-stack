@@ -1,0 +1,26 @@
+name: New stack
+description: Propose a stack before opening a PR
+title: "New stack: <your-id>"
+labels: ["new-stack"]
+body:
+  - type: textarea
+    id: who
+    attributes:
+      label: Who you are and how you use agents
+      description: A few sentences. Which agent(s), what kind of work.
+    validations:
+      required: true
+  - type: textarea
+    id: contents
+    attributes:
+      label: What you plan to include
+      description: The skills or checklists, one line each, and what your WORKFLOW.md will cover.
+    validations:
+      required: true
+  - type: input
+    id: id
+    attributes:
+      label: Stack id
+      description: Lowercase letters, digits and hyphens. Becomes community/<id>/.
+    validations:
+      required: true

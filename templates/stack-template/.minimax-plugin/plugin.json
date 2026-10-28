@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "name": "stack-template",
+  "version": "0.1.0",
+  "description": "One sentence about whose stack this is and what it helps with.",
+  "author": "Your name or handle",
+  "icon": "icon.png",
+  "category": "Code",
+  "exampleQueries": [],
+  "apps": [],
+  "mcpServers": [],
+  "skills": [
+    "skills/example/SKILL.md"
+  ]
+}

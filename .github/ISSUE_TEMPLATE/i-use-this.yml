@@ -1,0 +1,22 @@
+name: I use this
+description: Tell us you are using a stack or skill from this repository
+title: "I use: <stack/skill>"
+labels: ["i-use-this"]
+body:
+  - type: input
+    id: what
+    attributes:
+      label: Which stack or skill
+      placeholder: ronny/long-command-check
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: In which agent
+      placeholder: MiniMax Code, or another agent that supports skills
+  - type: textarea
+    id: how
+    attributes:
+      label: How you use it, and what you changed
+      description: Optional, but very useful. Did it catch something? Did you have to adapt it?

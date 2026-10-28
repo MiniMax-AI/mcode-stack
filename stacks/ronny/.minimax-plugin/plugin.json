@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "name": "ronny",
+  "version": "0.1.0",
+  "displayName": "Ronny's MCode Stack",
+  "description": "Daily workflows and self-check skills from the MiniMax Code R&D lead: independent review, subagent split checks, tool and context budget audits, long sessions, long commands, harness experiments and trajectory review.",
+  "author": "Ronny (MiniMax Code team)",
+  "icon": "icon.png",
+  "category": "Code",
+  "exampleQueries": [
+    "Review this diff from a clean context against the requirement",
+    "Audit how this agent handles long shell commands",
+    "Should this step go to a subagent or stay in the main loop?"
+  ],
+  "apps": [],
+  "mcpServers": [],
+  "skills": [
+    "skills/independent-review/SKILL.md",
+    "skills/subagent-split-check/SKILL.md",
+    "skills/harness-experiment/SKILL.md",
+    "skills/tool-budget-audit/SKILL.md",
+    "skills/long-session-check/SKILL.md",
+    "skills/handoff-doc/SKILL.md",
+    "skills/long-command-check/SKILL.md",
+    "skills/context-tax-audit/SKILL.md",
+    "skills/trajectory-review/SKILL.md"
+  ]
+}
