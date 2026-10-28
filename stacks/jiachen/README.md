@@ -23,3 +23,17 @@ a gitignored `test-cases/` folder, and `lifting-loops` writes everything it
 learns about you to a gitignored `private/` folder.
 
 How these fit into a working day: [`WORKFLOW.md`](WORKFLOW.md).
+
+## Origin
+
+Both skills are maintained in
+[yujiachen-y/dotfiles](https://github.com/yujiachen-y/dotfiles/tree/main/agents/skills), where changes land
+first; this stack carries a copy with personal examples replaced by neutral
+ones, released under MIT. The dotfiles repository has a few more skills (for
+example `making-flashcards` for Anki and `review-skill` for auditing skills)
+and its own marketplace for Claude Code and Codex:
+
+```bash
+/plugin marketplace add yujiachen-y/dotfiles      # Claude Code
+npx skills add yujiachen-y/dotfiles --skill <name>
+```

@@ -133,3 +133,5 @@ Text a proposal would put into a git-tracked file must meet every rule below:
 - Write a general working rule, not an account of one incident.
 
 Evidence and quotes go only under `private/`.
+
+<!-- Upstream: https://github.com/yujiachen-y/dotfiles/tree/main/agents/skills/lifting-loops -->

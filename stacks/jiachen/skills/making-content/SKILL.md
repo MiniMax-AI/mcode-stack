@@ -356,3 +356,5 @@ test-cases/
 ```
 
 Name a new test case with a `YYYY-MM-DD-` prefix for sorting and a folder name that describes the scenario (for example `2026-05-04-tech-explainer`).
+
+<!-- Upstream: https://github.com/yujiachen-y/dotfiles/tree/main/agents/skills/making-content -->
