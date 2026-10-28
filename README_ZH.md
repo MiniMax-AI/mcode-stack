@@ -149,4 +149,4 @@ MiniMax Code 本体在 [MiniMax-AI/minimax-code](https://github.com/MiniMax-AI/m
 
 ## License
 
-[MIT](LICENSE)。六个 `engineering-*` Skill 改编自 Google Engineering Practices（CC-BY 3.0），详见 [`stacks/ronny/NOTICE.md`](stacks/ronny/NOTICE.md)。
+[MIT](LICENSE)，各 stack 的 `NOTICE.md` 另有说明的除外。六个 `engineering-*` Skill 改编自 Google Engineering Practices，改编部分仍遵循 CC-BY 3.0，详见 [`stacks/ronny/NOTICE.md`](stacks/ronny/NOTICE.md)。

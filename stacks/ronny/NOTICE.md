@@ -3,12 +3,15 @@
 The six `engineering-*` skills in [`skills/`](skills/) were written by the
 stack's author and first published in
 [agentara/skills](https://github.com/agentara/skills/tree/main/skills/engineering).
-They are included here under that repository's MIT license, reproduced below.
 
 Their content is adapted from
-[Google Engineering Practices](https://google.github.io/eng-practices/),
-licensed under [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/).
-Each `SKILL.md` keeps its own source and license note.
+[Google Engineering Practices](https://google.github.io/eng-practices/)
+by Google, licensed under
+[CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/). The material has
+been condensed, reorganized and rewritten as agent skills. The adapted
+material stays under CC-BY 3.0; the author's own additions are released under
+the MIT license reproduced below. This project is not affiliated with or
+endorsed by Google. Each `SKILL.md` keeps its own source and license note.
 
 ## agentara/skills license
 
