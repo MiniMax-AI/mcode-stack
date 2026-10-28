@@ -16,5 +16,21 @@ Ronny, R&D lead of MiniMax Code. Each skill pairs with an article in the
 | [`context-tax-audit`](skills/context-tax-audit/SKILL.md) | Inventory what is injected into every request and how it affects the prompt cache | 06 |
 | [`trajectory-review`](skills/trajectory-review/SKILL.md) | Review how the agent got its result, not only whether it passed | - |
 
+### Engineering practice
+
+Six everyday engineering skills, also published in
+[agentara/skills](https://github.com/agentara/skills/tree/main/skills/engineering)
+and adapted from Google Engineering Practices (CC-BY 3.0). See
+[`NOTICE.md`](NOTICE.md) for licenses.
+
+| Skill | What it does |
+| --- | --- |
+| [`engineering-code-review`](skills/engineering-code-review/SKILL.md) | Review a change for code health: design, functionality, complexity, tests, approval risk |
+| [`engineering-review-comments`](skills/engineering-review-comments/SKILL.md) | Write clear, severity-labeled review comments that explain the reasoning |
+| [`engineering-review-feedback`](skills/engineering-review-feedback/SKILL.md) | Handle reviewer comments as the author: fix, clarify, resolve disagreements |
+| [`engineering-small-prs`](skills/engineering-small-prs/SKILL.md) | Split large features, refactors and migrations into small reviewable PRs |
+| [`engineering-change-descriptions`](skills/engineering-change-descriptions/SKILL.md) | Write PR and commit descriptions that say what changed and why |
+| [`engineering-emergency-changes`](skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
+
 Plain-text versions of the checklists live in [`checklists/`](checklists/).
 How Ronny strings them together: [`WORKFLOW.md`](WORKFLOW.md) (coming soon).

@@ -56,6 +56,12 @@ A stack usually has three kinds of things:
 | `long-command-check` | Ten-point audit of long shell commands and background tasks | 04 |
 | `context-tax-audit` | What gets injected into every request, and what it does to the prompt cache | 06 |
 | `trajectory-review` | Look at how the agent got its result, not only whether it passed | - |
+| `engineering-code-review` | Review a change for code health: design, functionality, complexity, tests, approval risk | - |
+| `engineering-review-comments` | Write clear, severity-labeled review comments that explain the reasoning | - |
+| `engineering-review-feedback` | Handle reviewer comments as the author: fix, clarify, resolve disagreements | - |
+| `engineering-small-prs` | Split large features, refactors and migrations into small reviewable PRs | - |
+| `engineering-change-descriptions` | Write PR and commit descriptions that say what changed and why | - |
+| `engineering-emergency-changes` | Decide whether a hotfix is a real emergency and run expedited review safely | - |
 
 ## Install
 

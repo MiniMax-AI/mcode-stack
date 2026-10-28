@@ -43,6 +43,12 @@ templates/stack-template/   写你自己的 stack，从这里开始
 | `long-command-check` | 长命令和后台任务的 10 项自查 | 04 |
 | `context-tax-audit` | 每轮往请求里塞了什么，会不会弄坏提示词缓存 | 06 |
 | `trajectory-review` | 不只看结果过没过，回头看 agent 是怎么得到这个结果的 | - |
+| `engineering-code-review` | 按代码健康度审查改动：设计、功能、复杂度、测试、能不能批 | - |
+| `engineering-review-comments` | 写清楚、标好严重程度、讲明理由的 review 评论 | - |
+| `engineering-review-feedback` | 作为作者处理 review 意见：改代码、补说明、化解分歧 | - |
+| `engineering-small-prs` | 把大功能、大重构、迁移拆成一串好审的小 PR | - |
+| `engineering-change-descriptions` | 写清楚改了什么、为什么改的 PR 和 commit 描述 | - |
+| `engineering-emergency-changes` | 判断 hotfix 是不是真紧急，紧急时怎么快审又不丢质量 | - |
 
 ## 安装
 

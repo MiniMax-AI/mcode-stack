@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "name": "ronny",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Ronny's MCode Stack",
-  "description": "Daily workflows and self-check skills from the MiniMax Code R&D lead: independent review, subagent split checks, tool and context budget audits, long sessions, long commands, harness experiments and trajectory review.",
+  "description": "Daily workflows and self-check skills from the MiniMax Code R&D lead: independent review, subagent split checks, tool and context budget audits, long sessions, long commands, harness experiments, trajectory review, plus everyday engineering practice for code review, review comments, small PRs, change descriptions and emergency changes.",
   "author": "Ronny (MiniMax Code team)",
   "icon": "icon.png",
   "category": "Code",
@@ -23,6 +23,12 @@
     "skills/handoff-doc/SKILL.md",
     "skills/long-command-check/SKILL.md",
     "skills/context-tax-audit/SKILL.md",
-    "skills/trajectory-review/SKILL.md"
+    "skills/trajectory-review/SKILL.md",
+    "skills/engineering-change-descriptions/SKILL.md",
+    "skills/engineering-code-review/SKILL.md",
+    "skills/engineering-emergency-changes/SKILL.md",
+    "skills/engineering-review-comments/SKILL.md",
+    "skills/engineering-review-feedback/SKILL.md",
+    "skills/engineering-small-prs/SKILL.md"
   ]
 }
