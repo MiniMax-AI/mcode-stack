@@ -6,7 +6,7 @@ MiniMax Code plugin package.
 
 | Stack | Owner | Status |
 | --- | --- | --- |
-| [`ronny`](ronny/) | Ronny, R&D lead | First batch: 9 skills |
+| [`ronny`](ronny/) | Ronny, R&D lead | 15 skills, 5 checklists |
 
 More team members' stacks are on the way.
 
