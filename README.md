@@ -183,6 +183,7 @@ repository only holds workflows and skills, no MiniMax Code source code.
 
 ## License
 
-[MIT](LICENSE). The six `engineering-*` skills are adapted from Google
-Engineering Practices (CC-BY 3.0); see
+[MIT](LICENSE), except where a stack's `NOTICE.md` says otherwise. The six
+`engineering-*` skills are adapted from Google Engineering Practices; the
+adapted material stays under CC-BY 3.0. See
 [`stacks/ronny/NOTICE.md`](stacks/ronny/NOTICE.md).
