@@ -2,16 +2,26 @@
 
 [中文](CONTRIBUTING_ZH.md)
 
+Issues and discussion are welcome. For now, pull requests for code,
+documentation, and stacks are accepted only from repository collaborators.
+If you are not a collaborator, [open an issue](https://github.com/MiniMax-AI/mcode-stack/issues/new/choose)
+to discuss first.
+
+The steps below are for collaborators who add or change a stack.
+
 ## What we accept
 
 - **A stack = one person's or one team's real daily practice**: a
   `WORKFLOW.md` plus at least one skill or checklist.
 - **Not accepted**: pure prompt collections, "ideal" processes nobody runs,
   and anything tied to a private system that others cannot run.
-- Improvements to existing skills are welcome too. Explain what went wrong
+- Collaborators can also improve an existing skill. Explain what went wrong
   without the change.
 
 ## How to submit a stack
+
+Collaborators follow every step. If you are not a collaborator, do step 1
+only.
 
 1. **Open a "New stack" issue first.** In a few sentences: who you are, how
    you use agents, and which pieces you plan to include.
@@ -66,8 +76,8 @@ into an existing skill.
 
 ## After it is merged
 
-- The author maintains their stack under `community/` and sends changes as
-  PRs.
+- The author maintains their stack under `community/`. Later changes are
+  pull requests from collaborators.
 - Stacks that go unmaintained or stop matching current MiniMax Code may be
   marked and later moved to an archive area.
 - Stacks that are well written and widely used may be featured in the

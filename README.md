@@ -26,7 +26,7 @@ checklist that installs straight into
 - [How it works](#how-it-works)
 - [Articles](#articles)
 - [Stacks](#stacks)
-- [Contribute your own stack](#contribute-your-own-stack)
+- [Contributing](#contributing)
 
 ## Quick start
 
@@ -170,8 +170,9 @@ skills and checklists. They pair with our *MCode Engineering Notes* column:
 the article explains the idea, this repository makes it runnable.
 
 We also believe harness engineering is a craft that moves forward by
-experiment. Everything here will keep changing as we learn. Take it, change
-it, and send your version back.
+experiment. Everything here will keep changing as we learn. Take it and
+change it. To suggest a change here, open an issue; see
+[Contributing](#contributing).
 
 ## Articles
 
@@ -190,18 +191,23 @@ stacks/ronny/               Ronny's stack (MiniMax Code R&D lead), the first and
 stacks/jiachen/             Jiachen's stack: getting out of the agent loop, and turning notes into posts and videos
 stacks/<name>/              One directory per team member; teammates are welcome to add theirs
 notes/                      Which runnable piece goes with each Engineering Notes article
-community/                  Stacks contributed by developers outside the team
-templates/stack-template/   Start here to write your own stack
+community/                  Stacks from outside the team, added by collaborators
+templates/stack-template/   Template for a new stack
 ```
 
 Every stack is also a MiniMax Code plugin package. See
 [`stacks/ronny`](stacks/ronny/) and [`stacks/jiachen`](stacks/jiachen/) for
 what each one contains.
 
-## Contribute your own stack
+## Contributing
 
-What we most want to see is how you actually work with MiniMax Code, or with
-any other agent, day to day.
+Issues and discussion are welcome. For now, pull requests for code,
+documentation, and stacks are accepted only from repository collaborators.
+If you are not a collaborator, [open an issue](https://github.com/MiniMax-AI/mcode-stack/issues/new/choose)
+to discuss first.
+
+We still want to hear how you work with MiniMax Code, or any other agent,
+day to day. Share that in an issue. Collaborators adding a stack:
 
 1. Copy `templates/stack-template/` to `community/<your-id>/`.
 2. Write a `WORKFLOW.md`: how you use the agent every day, what you hand to it

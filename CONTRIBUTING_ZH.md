@@ -2,13 +2,19 @@
 
 [English](CONTRIBUTING.md)
 
+欢迎开 issue 讨论。代码、文档和 stack 的 PR，目前只收仓库协作者的。还不是协作者的话，先[开一个 issue](https://github.com/MiniMax-AI/mcode-stack/issues/new/choose) 把想法说清楚。
+
+下面是给协作者加 stack、改 stack 用的。
+
 ## 我们收什么
 
 - **一份 stack = 一个人或一个团队真实的日常用法**：一份 `WORKFLOW.md`，加上至少一个 Skill 或清单。
 - **不收**：纯 prompt 合集、没人在用的「理想流程」、和某个内部系统强绑定、别人没法跑的东西。
-- 也欢迎改进已有的 Skill，请说清楚不改的话 agent 会在哪儿出错。
+- 协作者也可以改已有的 Skill，请说清楚不改的话 agent 会在哪儿出错。
 
 ## 提交流程
+
+协作者走完全部步骤。还不是协作者的，只做第 1 步。
 
 1. **先开一个「New stack」issue**，用几句话说清楚你是谁、怎么用 agent、打算放哪几样东西。
 2. **从模板复制**到 `community/<id>/`。`id` 只用小写字母、数字和连字符，并且要和 `.minimax-plugin/plugin.json` 里的 `name` 一致。
@@ -40,7 +46,7 @@ PR 只要改了某份 stack 里的文件，就要同时调高它 `.minimax-plugi
 
 ## 收录之后
 
-- 进了 `community/`，作者就是这份 stack 的维护人，后续改动由作者自己提 PR。
+- 进了 `community/`，作者就是这份 stack 的维护人。后续改动同样由协作者提 PR。
 - 长期没人维护、和新版 MiniMax Code 对不上的，会先标记，再移到归档区。
 - 写得好、用的人多的，会在工程笔记或官方渠道里介绍。
 
