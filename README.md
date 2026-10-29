@@ -158,15 +158,15 @@ it, and send your version back.
 ```text
 stacks/ronny/               Ronny's stack (MiniMax Code R&D lead), the first and most complete one
 stacks/jiachen/             Jiachen's stack: getting out of the agent loop, and turning notes into posts and videos
-stacks/<name>/              Other team members' stacks (on the way)
+stacks/<name>/              One directory per team member; teammates are welcome to add theirs
 notes/                      Which runnable piece goes with each Engineering Notes article
 community/                  Stacks contributed by developers outside the team
 templates/stack-template/   Start here to write your own stack
 ```
 
 Every stack is also a MiniMax Code plugin package. See
-[`stacks/ronny`](stacks/ronny/) for its skills, checklists and
-[`WORKFLOW.md`](stacks/ronny/WORKFLOW.md).
+[`stacks/ronny`](stacks/ronny/) and [`stacks/jiachen`](stacks/jiachen/) for
+what each one contains.
 
 ## Contribute your own stack
 

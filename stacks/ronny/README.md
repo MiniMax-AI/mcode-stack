@@ -48,4 +48,3 @@ and adapted from Google Engineering Practices (CC-BY 3.0). See
 | [`engineering-emergency-changes`](skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
 
 Plain-text versions of the checklists live in [`checklists/`](checklists/).
-How Ronny strings them together: [`WORKFLOW.md`](WORKFLOW.md) (coming soon).

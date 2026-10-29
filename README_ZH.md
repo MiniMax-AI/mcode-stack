@@ -126,13 +126,13 @@ AI 写代码越来越快，真正拉开差距的，是围绕 agent 的那一圈�
 ```text
 stacks/ronny/               MiniMax Code 研发负责人 Ronny 的日常工作流，第一份，也是目前最完整的一份
 stacks/jiachen/             Jiachen 的工作流：把自己从 agent 的循环里解放出来，以及把笔记做成图文和短视频
-stacks/<name>/              团队其他成员各自的工作流（陆续上线）
+stacks/<name>/              每位成员一个目录，欢迎团队同事把自己的也放进来
 notes/                      「MCode 工程笔记」每一篇对应哪一份能跑的东西
 community/                  外部开发者提交的 stack
 templates/stack-template/   写你自己的 stack，从这里开始
 ```
 
-每份 stack 本身也是一个 MiniMax Code 插件包。[`stacks/ronny`](stacks/ronny/) 里有它的 Skill、清单和 [`WORKFLOW.md`](stacks/ronny/WORKFLOW.md)。
+每份 stack 本身也是一个 MiniMax Code 插件包，具体内容见 [`stacks/ronny`](stacks/ronny/) 和 [`stacks/jiachen`](stacks/jiachen/)。
 
 ## 贡献你自己的 stack
 
