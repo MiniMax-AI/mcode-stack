@@ -33,7 +33,7 @@ shown by `mcode plugin marketplace list`, or copy single skills into
 
 ### Engineering practice
 
-Six everyday engineering skills, also published in
+Everyday engineering skills, also published in
 [agentara/skills](https://github.com/agentara/skills/tree/main/skills/engineering)
 and adapted from Google Engineering Practices (CC-BY 3.0). See
 [`NOTICE.md`](NOTICE.md) for licenses.

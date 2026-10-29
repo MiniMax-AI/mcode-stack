@@ -1,6 +1,6 @@
 # Third-party notices
 
-The six `engineering-*` skills in [`skills/`](skills/) were written by the
+The `engineering-*` skills in [`skills/`](skills/) were written by the
 stack's author and first published in
 [agentara/skills](https://github.com/agentara/skills/tree/main/skills/engineering).
 
