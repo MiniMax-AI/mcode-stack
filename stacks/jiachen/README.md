@@ -4,6 +4,38 @@ The stack of Jiachen, an engineer on MiniMax Code: one skill that keeps
 taking the user out of the agent loop, and one that turns notes into posts and
 short videos.
 
+## Install
+
+In Claude Code, one command installs this stack. In a shell:
+
+```bash
+claude plugin install jiachen --marketplace MiniMax-AI/mcode-stack
+```
+
+Inside a session:
+
+```bash
+/plugin install jiachen --marketplace MiniMax-AI/mcode-stack
+```
+
+Older Claude Code can add the marketplace first, then install:
+
+```bash
+/plugin marketplace add MiniMax-AI/mcode-stack
+/plugin install jiachen@mcode-stack
+```
+
+In Codex, add the marketplace, then install from the Plugins Directory or the CLI:
+
+```bash
+codex plugin marketplace add MiniMax-AI/mcode-stack
+codex plugin add jiachen@mcode-stack
+```
+
+In MiniMax Code, copy this whole directory into the local plugin directory
+shown by `mcode plugin marketplace list`, or copy single skills into
+`~/.agents/skills/`. See the [repository README](../../README.md#quick-start).
+
 | Skill | What it does |
 | --- | --- |
 | [`lifting-loops`](skills/lifting-loops/SKILL.md) | Find the loops where you keep acting as a manual step for your agents (retrying, judging output, approving, carrying context, starting the same task by hand) and turn each one into a concrete fix: delete a stale rule, change a skill or `AGENTS.md`, add a script, a skill or a scheduled task. Reads local MiniMax Code, Claude Code and Codex sessions; keeps its ledger in a gitignored `private/` folder. |

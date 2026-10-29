@@ -5,6 +5,9 @@
 //    the directory, the icon and every referenced SKILL.md exist, every skill
 //    directory is listed in the manifest, and every SKILL.md has frontmatter
 //    with a `name` equal to its directory and a non-empty `description`.
+//    When a stack also has .claude-plugin/plugin.json, .codex-plugin/plugin.json,
+//    or a portable root plugin.json, those copies keep the same name, version,
+//    description, and author as .minimax-plugin/plugin.json.
 // 2. Marketplace: .claude-plugin/marketplace.json has exactly one entry per
 //    stack under stacks/ and community/, named after its directory, with the
 //    same description as its plugin.json and no component fields (the stack's
@@ -85,6 +88,31 @@ function checkSkill(skillDir, name) {
   else if (fm.description.length > 1024) err(where, "description is longer than 1024 characters");
 }
 
+function authorName(value) {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && typeof value.name === "string") return value.name;
+  return undefined;
+}
+
+function checkCompanionManifest(root, manifest, relPath) {
+  const file = join(root, relPath);
+  if (!existsSync(file)) return;
+  const where = relative(ROOT, file);
+  let doc;
+  try {
+    doc = JSON.parse(readFileSync(file, "utf8"));
+  } catch (e) {
+    return err(where, `does not parse: ${e.message}`);
+  }
+  if (doc.name !== manifest.name) err(where, `"name" must equal "${manifest.name}"`);
+  if (doc.version !== manifest.version)
+    err(where, `"version" ${JSON.stringify(doc.version)} must equal .minimax-plugin/plugin.json version ${JSON.stringify(manifest.version)}`);
+  if (doc.description !== manifest.description)
+    err(where, '"description" must equal the description in .minimax-plugin/plugin.json');
+  if (authorName(doc.author) !== manifest.author)
+    err(where, `"author" name must equal ${JSON.stringify(manifest.author)}`);
+}
+
 function checkStack(root) {
   const name = root.split("/").pop();
   const where = relative(ROOT, root);
@@ -108,6 +136,9 @@ function checkStack(root) {
     if (!listed.has(ref)) err(where, `${ref} is not listed in plugin.json "skills"`);
     checkSkill(join(root, "skills", skill), skill);
   }
+  checkCompanionManifest(root, manifest, ".claude-plugin/plugin.json");
+  checkCompanionManifest(root, manifest, ".codex-plugin/plugin.json");
+  checkCompanionManifest(root, manifest, "plugin.json");
 }
 
 const stacks = [];

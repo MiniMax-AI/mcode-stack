@@ -1,0 +1,25 @@
+{
+  "name": "jiachen",
+  "version": "0.1.1",
+  "description": "Find the loops where you keep acting as a manual step for your agents (retrying, judging, approving, carrying context) and lift yourself out of them, plus a content pipeline that rewrites AI-sounding Chinese drafts and turns material into Xiaohongshu image posts and short vertical videos.",
+  "author": {
+    "name": "Jiachen (MiniMax Code team)"
+  },
+  "homepage": "https://github.com/MiniMax-AI/mcode-stack/tree/main/stacks/jiachen",
+  "repository": "https://github.com/MiniMax-AI/mcode-stack",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Jiachen's MCode Stack",
+    "shortDescription": "Find the loops where you keep acting as a manual step for your agents.",
+    "longDescription": "Find the loops where you keep acting as a manual step for your agents (retrying, judging, approving, carrying context) and lift yourself out of them, plus a content pipeline that rewrites AI-sounding Chinese drafts and turns material into Xiaohongshu image posts and short vertical videos.",
+    "developerName": "Jiachen (MiniMax Code team)",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/MiniMax-AI/mcode-stack/tree/main/stacks/jiachen",
+    "defaultPrompt": [
+      "Look back at this session: where did I keep stepping in by hand?",
+      "Scan my recent agent sessions for repeated manual work",
+      "把这篇草稿改成我的风格，去掉 AI 味"
+    ]
+  }
+}

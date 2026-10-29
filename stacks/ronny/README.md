@@ -6,11 +6,30 @@ Ronny, R&D lead of MiniMax Code. Most skills pair with an article in the
 
 ## Install
 
-From the marketplace, in Claude Code:
+In Claude Code, one command installs this stack. In a shell:
+
+```bash
+claude plugin install ronny --marketplace MiniMax-AI/mcode-stack
+```
+
+Inside a session:
+
+```bash
+/plugin install ronny --marketplace MiniMax-AI/mcode-stack
+```
+
+Older Claude Code can add the marketplace first, then install:
 
 ```bash
 /plugin marketplace add MiniMax-AI/mcode-stack
 /plugin install ronny@mcode-stack
+```
+
+In Codex, add the marketplace, then install from the Plugins Directory or the CLI:
+
+```bash
+codex plugin marketplace add MiniMax-AI/mcode-stack
+codex plugin add ronny@mcode-stack
 ```
 
 In MiniMax Code, copy this whole directory into the local plugin directory

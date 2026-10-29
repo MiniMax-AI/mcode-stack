@@ -26,7 +26,7 @@
 
 ## 修改已有的 stack
 
-PR 只要改了某份 stack 里的文件，就要同时调高它 `.minimax-plugin/plugin.json` 里的 `version`（比如 `0.2.0` 改成 `0.2.1`）。从插件市场装的用户，只有版本号变高才会收到更新，所以不调版本号的改动 CI 会直接报错。本地可以用 `CHECK_BASE=origin/main node scripts/check.mjs` 跑同样的检查。
+PR 只要改了某份 stack 里的文件，就要同时调高它 `.minimax-plugin/plugin.json` 里的 `version`（比如 `0.2.0` 改成 `0.2.1`）。从插件市场装的用户，只有版本号变高才会收到更新，所以不调版本号的改动 CI 会直接报错。如果这份 stack 还有 `.claude-plugin/plugin.json`、`.codex-plugin/plugin.json` 或根目录的 `plugin.json`，里面的 `name`、`version`、`description` 和作者名要和 `.minimax-plugin/plugin.json` 保持一致。本地可以用 `CHECK_BASE=origin/main node scripts/check.mjs` 跑同样的检查。
 
 ## 怎么审
 

@@ -1,0 +1,32 @@
+{
+  "name": "mcode-stack",
+  "interface": {
+    "displayName": "MCode Stack"
+  },
+  "plugins": [
+    {
+      "name": "ronny",
+      "source": {
+        "source": "local",
+        "path": "./stacks/ronny"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "jiachen",
+      "source": {
+        "source": "local",
+        "path": "./stacks/jiachen"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
