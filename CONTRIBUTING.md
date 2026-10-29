@@ -41,7 +41,10 @@
 Whenever a PR changes anything inside a stack, raise `version` in its
 `.minimax-plugin/plugin.json` (for example `0.2.0` to `0.2.1`). People who
 installed the stack from the marketplace only get the update when the version
-goes up, so CI fails a change without a bump. Run the same check locally with
+goes up, so CI fails a change without a bump. When the stack also has
+`.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, or a root
+`plugin.json`, keep the same `name`, `version`, `description`, and author name
+in those files. Run the same check locally with
 `CHECK_BASE=origin/main node scripts/check.mjs`.
 
 ## How we review

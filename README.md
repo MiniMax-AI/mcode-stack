@@ -30,6 +30,43 @@ checklist that installs straight into
 
 ## Quick start
 
+**Claude Code, one command.** The command adds this marketplace and installs
+a whole stack. In a shell:
+
+```bash
+claude plugin install ronny --marketplace MiniMax-AI/mcode-stack
+```
+
+Inside a Claude Code session:
+
+```bash
+/plugin install ronny --marketplace MiniMax-AI/mcode-stack
+```
+
+Use `jiachen` in place of `ronny` for that stack. From a clone of this
+repository, `scripts/install.sh` installs `ronny` (`scripts/install.sh jiachen`
+for that stack) with `claude` or `codex` when either is on `PATH`, and
+otherwise copies that stack's skills into `~/.agents/skills/`.
+
+Older Claude Code can add the marketplace first, then install:
+
+```bash
+/plugin marketplace add MiniMax-AI/mcode-stack
+/plugin install ronny@mcode-stack
+```
+
+**Codex.** Add the marketplace, then install from the Plugins Directory or the
+CLI:
+
+```bash
+codex plugin marketplace add MiniMax-AI/mcode-stack
+codex plugin add ronny@mcode-stack
+```
+
+Substitute `jiachen` the same way. To take a single skill instead of the
+plugin, copy that skill's folder into `~/.agents/skills/`. Codex and MiniMax
+Code both scan that directory; the copy steps are below.
+
 **One skill, for all your projects:**
 
 ```bash
@@ -52,20 +89,13 @@ Copy the whole `stacks/ronny` directory into that directory, then open
 installed as soon as it is in that directory; press Space in the panel to
 enable or disable it.
 
-**Every stack, from the marketplace:**
+**Every stack, from the MiniMax Code marketplace:**
 
 This repository is also a plugin marketplace, so you can install a stack
 without copying files and pick up updates later. In MiniMax Code desktop, open
 **Plugins**, choose **Add marketplace** and enter `MiniMax-AI/mcode-stack`; each
 stack then shows up as one plugin you can install, update or uninstall. Adding
 marketplaces is rolling out gradually, so your version may not have it yet.
-
-The same catalog works in Claude Code:
-
-```bash
-/plugin marketplace add MiniMax-AI/mcode-stack
-/plugin install ronny@mcode-stack
-```
 
 <details>
 <summary>More install options</summary>

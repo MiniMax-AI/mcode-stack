@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jiachen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Jiachen's MCode Stack",
   "description": "Find the loops where you keep acting as a manual step for your agents (retrying, judging, approving, carrying context) and lift yourself out of them, plus a content pipeline that rewrites AI-sounding Chinese drafts and turns material into Xiaohongshu image posts and short vertical videos.",
   "author": "Jiachen (MiniMax Code team)",

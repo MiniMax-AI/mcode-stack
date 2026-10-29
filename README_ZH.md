@@ -24,6 +24,36 @@
 
 ## 快速开始
 
+**Claude Code，一条命令。** 这条命令会加上本仓库的插件市场，并装上一整份 stack。在 shell 里：
+
+```bash
+claude plugin install ronny --marketplace MiniMax-AI/mcode-stack
+```
+
+在 Claude Code 会话里：
+
+```bash
+/plugin install ronny --marketplace MiniMax-AI/mcode-stack
+```
+
+装 Jiachen 的 stack 时，把 `ronny` 换成 `jiachen`。克隆本仓库后可以跑 `scripts/install.sh`（默认 `ronny`，或 `scripts/install.sh jiachen`）：`PATH` 里有 `claude` 或 `codex` 时，它会执行同样的安装，否则把该 stack 的 Skill 复制到 `~/.agents/skills/`。
+
+较旧的 Claude Code 可以先加市场，再安装：
+
+```bash
+/plugin marketplace add MiniMax-AI/mcode-stack
+/plugin install ronny@mcode-stack
+```
+
+**Codex。** 先加上市场，再从 Plugins Directory 或 CLI 安装：
+
+```bash
+codex plugin marketplace add MiniMax-AI/mcode-stack
+codex plugin add ronny@mcode-stack
+```
+
+把 `ronny` 换成 `jiachen` 即可。如果只要某一个 Skill，把它的目录复制到 `~/.agents/skills/`。Codex 和 MiniMax Code 都会扫描这个目录，复制步骤见下文。
+
 **装一个 Skill，所有项目都能用：**
 
 ```bash
@@ -42,16 +72,9 @@ mcode plugin marketplace list    # 查看本地插件目录
 
 把 `stacks/ronny` 整个目录复制到那个目录下，然后在 MiniMax Code 里打开 `/plugins`，按 `Ctrl+R` 刷新。本地插件放进去就算装好了，可以在面板里按空格启用或停用。
 
-**从插件市场安装：**
+**从 MiniMax Code 插件市场安装：**
 
 这个仓库本身也是一个插件市场，不用复制文件就能装，之后有更新也能直接拿到。在 MiniMax Code 桌面端打开「插件」，点「添加市场」，填入 `MiniMax-AI/mcode-stack`，每份 stack 都会显示成一个插件，可以安装、更新或卸载。添加市场的功能正在逐步开放，你的版本可能还没有。
-
-Claude Code 也能用同一份目录：
-
-```bash
-/plugin marketplace add MiniMax-AI/mcode-stack
-/plugin install ronny@mcode-stack
-```
 
 <details>
 <summary>更多安装方式</summary>
