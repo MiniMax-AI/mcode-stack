@@ -142,7 +142,7 @@ AI 写代码越来越快，真正拉开差距的，是围绕 agent 的那一圈�
 | 02 | [工具一多，context 就爆：从 tool search 到 PTC](notes/02-tool-context.md) | `tool-budget-audit` |
 | 03 | [长会话怎么不变傻：compaction 和 memory 的取舍](notes/03-compaction-memory.md) | `long-session-check`、`handoff-doc` |
 | 04 | [一条 bash 命令该等多久：从前台阻塞到后台任务](notes/04-bash-background.md) | `long-command-check` |
-| 06 | [每一轮都在交的隐形税：agent 往上下文里塞了什么](notes/06-context-tax.md)（即将发布） | `context-tax-audit` |
+| 05 | [一个小字段，拖垮整段前缀缓存](notes/05-prefix-cache.md) | `context-tax-audit` |
 
 ## Stacks
 

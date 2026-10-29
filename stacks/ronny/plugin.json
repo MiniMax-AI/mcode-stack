@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "ronny",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Daily workflows and self-check skills from the MiniMax Code R&D lead: independent review, subagent split checks, tool and context budget audits, long sessions, long commands, harness experiments, trajectory review, plus everyday engineering practice for code review, review comments, small PRs, change descriptions and emergency changes.",
   "author": {
     "name": "Ronny (MiniMax Code team)"

@@ -10,7 +10,9 @@ environment info, the skill list, tool definitions, per-turn context blocks,
 reminders. Most of it is worth paying for. The audit finds what is not, and
 what is placed so that it breaks the prompt cache.
 
-Companion to MCode Engineering Notes 06 (upcoming).
+Companion to MCode Engineering Notes 05 (how the agent learns the
+current time — and why stuffing `date` into the system prompt breaks the
+prefix cache).
 Plain-text checklist: `checklists/context-tax.md`.
 
 ## 1. Inventory one real request
@@ -45,26 +47,24 @@ Caches match on prefix. One changed byte invalidates everything after it.
 
 Rules of thumb:
 
-- Stable first, volatile last. Keep the system prompt identical for the whole
-  session; put time and similar fields in the per-turn message.
+- Stable first, volatile last. Keep `# Environment` free of current time; put
+  time in per-turn `<agent-context>` (or the equivalent user-message block).
 - Never rewrite reminders already in history; change only future turns.
 - Use only the precision you need. A timestamp to the second guarantees every
-  copy differs.
-- Do not switch prompt or tool set mid-session unless you mean to pay for it.
-
+  copy differs once placement is already right.
+- Request-only reminders never enter the cache — control how often they fire,
+  but do not confuse that thrift with protecting the prefix.
 ## 4. Run the checklist
 
 | Item | Question |
 | --- | --- |
-| Inventory | Can you list every part of a request besides the user message, with its size? |
+| Prefix awareness | Can you point to the stable prefix vs what changes every turn? |
 | Necessity | For each part, where does the model go wrong without it? |
-| Frequency | Does it need to be in every turn or request, or only at the start, at key points, or on change? |
+| Position | Is anything volatile inside the system prompt or tool definitions? (e.g. time in `# Environment`) |
+| Frequency | Does a changing field need every turn / request, or only at the start, key points, or on change? |
 | Precision | Does it need seconds, exact counts? Higher precision means more turn-to-turn variation. |
-| Position | Is anything volatile inside the system prompt or tool definitions? |
 | History | Are reminders already in history ever rewritten later? |
-| Request-level reminders | Is the frequency of end-of-request reminders controlled? |
 | Recovery paths | If you remove something, does it vanish entirely on compaction, session resume or subagents? Who restores it? |
-| Mode consistency | Can the prompt or tool set change mid-session? |
 | Measurement | Before and after a change, do you look at cache hit rate, cost per turn and task quality, not just token count? |
 
 ## Output

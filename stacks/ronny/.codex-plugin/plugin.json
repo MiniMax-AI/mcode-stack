@@ -1,6 +1,6 @@
 {
   "name": "ronny",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Daily workflows and self-check skills from the MiniMax Code R&D lead: independent review, subagent split checks, tool and context budget audits, long sessions, long commands, harness experiments, trajectory review, plus everyday engineering practice for code review, review comments, small PRs, change descriptions and emergency changes.",
   "author": {
     "name": "Ronny (MiniMax Code team)"
@@ -14,7 +14,10 @@
     "longDescription": "Daily workflows and self-check skills from the MiniMax Code R&D lead: independent review, subagent split checks, tool and context budget audits, long sessions, long commands, harness experiments, trajectory review, plus everyday engineering practice for code review, review comments, small PRs, change descriptions and emergency changes.",
     "developerName": "Ronny (MiniMax Code team)",
     "category": "Developer Tools",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://github.com/MiniMax-AI/mcode-stack/tree/main/stacks/ronny",
     "defaultPrompt": [
       "Review this diff from a clean context against the requirement",
