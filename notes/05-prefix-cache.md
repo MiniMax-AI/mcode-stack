@@ -1,10 +1,11 @@
-# 05 · One small field can break the whole prefix cache
+# 05 · How does the agent know the current time?
 
-**In one line:** prompt caches match on prefix. A volatile field in the system
-prompt kills the whole stable prefix; put session-stable env up front and
-per-turn time in `<agent-context>` that is never rewritten. For each injected
-part, ask what breaks without it, whether it needs every turn, how precise it
-must be, and whether its position breaks the prompt cache.
+**In one line:** the model has no clock. Stuffing `date` into the system
+prompt is the most direct fix — and it breaks the prefix cache every turn.
+Put session-stable `# Environment` up front; put per-turn time in
+`<agent-context>` that is never rewritten; keep precision to the minute.
+For each injected part, ask what breaks without it, whether it needs every
+turn, how precise it must be, and whether its position breaks the prompt cache.
 
 **Companion skill:** `context-tax-audit` - inventory one real request, then
 check necessity, frequency, precision, position and cache impact.

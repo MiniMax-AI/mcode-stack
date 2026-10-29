@@ -10,7 +10,9 @@ environment info, the skill list, tool definitions, per-turn context blocks,
 reminders. Most of it is worth paying for. The audit finds what is not, and
 what is placed so that it breaks the prompt cache.
 
-Companion to MCode Engineering Notes 05.
+Companion to MCode Engineering Notes 05 (how the agent learns the
+current time — and why stuffing `date` into the system prompt breaks the
+prefix cache).
 Plain-text checklist: `checklists/context-tax.md`.
 
 ## 1. Inventory one real request
