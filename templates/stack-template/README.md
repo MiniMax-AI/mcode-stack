@@ -1,6 +1,8 @@
 # Stack template
 
-Copy this directory to start your own stack:
+Copy this directory to start a stack. Pull requests that add one are accepted
+only from repository collaborators. If you are not a collaborator, open an
+issue first ([CONTRIBUTING.md](../../CONTRIBUTING.md)).
 
 ```bash
 cp -R templates/stack-template community/<your-id>

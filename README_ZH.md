@@ -20,7 +20,7 @@
 - [怎么用起来](#怎么用起来)
 - [工程笔记](#工程笔记)
 - [Stacks](#stacks)
-- [贡献你自己的 stack](#贡献你自己的-stack)
+- [参与贡献](#参与贡献)
 
 ## 快速开始
 
@@ -132,7 +132,7 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 
 AI 写代码越来越快，真正拉开差距的，是围绕 agent 的那一圈工程习惯：什么时候让它停下来自查，review 交给谁，状态记在哪，实验怎么做才算数。这些东西写在文章里很难照着做，所以我们把它们做成了 Skill 和清单，和「MCode 工程笔记」专栏对应：文章把道理讲清楚，仓库负责落地。
 
-我们也相信，harness 工程是一门靠实验推进的手艺。这里的每一份东西都会随着我们的实践继续改。欢迎拿去用、拿去改，再把你的版本提回来。
+我们也相信，harness 工程是一门靠实验推进的手艺。这里的每一份东西都会随着我们的实践继续改。欢迎拿去用、拿去改。想改仓库里的内容，先开 issue，见[参与贡献](#参与贡献)。
 
 ## 工程笔记
 
@@ -151,15 +151,17 @@ stacks/ronny/               MiniMax Code 研发负责人 Ronny 的日常工作�
 stacks/jiachen/             Jiachen 的工作流：把自己从 agent 的循环里解放出来，以及把笔记做成图文和短视频
 stacks/<name>/              每位成员一个目录，欢迎团队同事把自己的也放进来
 notes/                      「MCode 工程笔记」每一篇对应哪一份能跑的东西
-community/                  外部开发者提交的 stack
-templates/stack-template/   写你自己的 stack，从这里开始
+community/                  团队外的 stack，由协作者加进来
+templates/stack-template/   新增 stack 用的模板
 ```
 
 每份 stack 本身也是一个 MiniMax Code 插件包，具体内容见 [`stacks/ronny`](stacks/ronny/) 和 [`stacks/jiachen`](stacks/jiachen/)。
 
-## 贡献你自己的 stack
+## 参与贡献
 
-我们最想看到的，是你用 MiniMax Code（或者别的 agent）每天到底怎么干活。
+欢迎开 issue 讨论。代码、文档和 stack 的 PR，目前只收仓库协作者的。还不是协作者的话，先[开一个 issue](https://github.com/MiniMax-AI/mcode-stack/issues/new/choose) 把想法说清楚。
+
+我们很想知道你用 MiniMax Code（或者别的 agent）每天到底怎么干活，写在 issue 里就行。协作者要把一份 stack 放进仓库，按这几步：
 
 1. 从 `templates/stack-template/` 复制一份到 `community/<你的 id>/`
 2. 写一份 `WORKFLOW.md`：你每天怎么用 agent，哪些环节交给它，哪些自己盯着

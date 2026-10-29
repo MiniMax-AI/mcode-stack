@@ -1,5 +1,5 @@
 name: New stack
-description: Propose a stack before opening a PR
+description: Propose a stack. Pull requests are accepted only from collaborators.
 title: "New stack: <your-id>"
 labels: ["new-stack"]
 body:

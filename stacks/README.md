@@ -29,4 +29,6 @@ Keep it public-safe: no internal hostnames, links, project codenames,
 internal metrics, credentials or customer data. Skills must work for someone
 outside the team.
 
-External contributors: please use [`community/`](../community/) instead.
+Stacks from outside the team go in [`community/`](../community/). Pull
+requests are accepted only from repository collaborators. If you are not a
+collaborator, open an issue first. See [CONTRIBUTING.md](../CONTRIBUTING.md).

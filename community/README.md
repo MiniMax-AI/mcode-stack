@@ -1,8 +1,11 @@
 # Community stacks
 
-Stacks contributed by developers outside the MiniMax Code team. We want to
-see how you actually work with MiniMax Code, or with any agent that supports
-`SKILL.md` skills.
+Stacks from developers outside the MiniMax Code team: how people actually
+work with MiniMax Code, or with any agent that supports `SKILL.md` skills.
+
+Issues and discussion are welcome. For now, pull requests are accepted only
+from repository collaborators. If you are not a collaborator, open an issue
+to discuss first.
 
 ## What we accept
 
@@ -12,6 +15,9 @@ see how you actually work with MiniMax Code, or with any agent that supports
   tied to a private system that others cannot run.
 
 ## How to submit
+
+Collaborators follow every step. If you are not a collaborator, do step 1
+only.
 
 1. Open a **New stack** issue first: who you are, how you use agents, and what
    you plan to include.
@@ -31,4 +37,4 @@ Full rules: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 | Stack | Author | What it covers |
 | --- | --- | --- |
-| *Yours could be the first.* | | |
+| *None yet.* | | |
