@@ -53,4 +53,4 @@ PR 只要改了某份 stack 里的文件，就要同时调高它 `.minimax-plugi
 
 ## 许可和行为规范
 
-提交即表示你同意按本仓库的 [MIT License](LICENSE) 发布。在 issue 和 review 里请保持尊重、就事论事。
+提交即表示你同意按本仓库的 [MIT License](LICENSE) 发布。第三方内容沿用它原来的许可，请注明出处，并在 stack 的 `NOTICE.md` 里写清许可。在 issue 和 review 里请保持尊重、就事论事。

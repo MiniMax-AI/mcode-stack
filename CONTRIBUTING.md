@@ -83,5 +83,6 @@ into an existing skill.
 ## License and conduct
 
 By submitting, you agree that your contribution is released under this
-repository's [MIT License](LICENSE). Be respectful and constructive in
+repository's [MIT License](LICENSE). Third-party material keeps its own
+license: credit it and note the license in your stack's `NOTICE.md`. Be respectful and constructive in
 issues and reviews.

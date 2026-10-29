@@ -1,12 +1,6 @@
-# Ronny's day with MiniMax Code
+# Ronny's stack: when to use each skill
 
-> **Coming soon.** This page will describe, in Ronny's own words, how he works
-> with MiniMax Code every day: which parts he hands to the agent, how reviews
-> are arranged, how experiments are recorded, and where he keeps a close eye
-> himself. It is intentionally left empty until he writes it.
-
-Until then, the skills in [`skills/`](skills/) are the parts of the workflow
-that are already written down. A rough map:
+Which skill in [`skills/`](skills/) fits which moment of the day:
 
 | Moment in the day | Skill |
 | --- | --- |

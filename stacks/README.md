@@ -9,7 +9,7 @@ MiniMax Code plugin package.
 | [`ronny`](ronny/) | Ronny, R&D lead | 15 skills, 5 checklists |
 | [`jiachen`](jiachen/) | Jiachen, engineer | 2 skills |
 
-More team members' stacks are on the way.
+Teammates are welcome to add their own; see below.
 
 ## Adding a team stack
 

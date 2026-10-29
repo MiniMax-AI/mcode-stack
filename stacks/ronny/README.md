@@ -1,8 +1,23 @@
 # ronny
 
 The first stack in MCode Stack: the workflows and self-check skills of
-Ronny, R&D lead of MiniMax Code. Each skill pairs with an article in the
+Ronny, R&D lead of MiniMax Code. Most skills pair with an article in the
 *MCode Engineering Notes* series (see [`../../notes/`](../../notes/)).
+
+## Install
+
+From the marketplace, in Claude Code:
+
+```bash
+/plugin marketplace add MiniMax-AI/mcode-stack
+/plugin install ronny@mcode-stack
+```
+
+In MiniMax Code, copy this whole directory into the local plugin directory
+shown by `mcode plugin marketplace list`, or copy single skills into
+`~/.agents/skills/`. See the [repository README](../../README.md#quick-start).
+
+## Skills
 
 | Skill | What it does | Notes |
 | --- | --- | --- |
@@ -33,4 +48,3 @@ and adapted from Google Engineering Practices (CC-BY 3.0). See
 | [`engineering-emergency-changes`](skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
 
 Plain-text versions of the checklists live in [`checklists/`](checklists/).
-How Ronny strings them together: [`WORKFLOW.md`](WORKFLOW.md) (coming soon).
