@@ -10,6 +10,6 @@ repository holds something you can install and run for it.
 | 02 | [Too many tools will eat your context: from tool search to PTC](02-tool-context.md) | `tool-budget-audit` |
 | 03 | [Keeping long sessions sharp: compaction vs. memory](03-compaction-memory.md) | `long-session-check`, `handoff-doc` |
 | 04 | [How long should one bash command wait: from foreground blocking to background tasks](04-bash-background.md) | `long-command-check` |
-| 05 | [One small field can break the whole prefix cache](05-prefix-cache.md) | `context-tax-audit` |
+| 05 | [How does the agent know the current time?](05-prefix-cache.md) | `context-tax-audit` |
 
 All companion skills live in [`stacks/ronny/skills/`](../stacks/ronny/skills/).

@@ -3,9 +3,10 @@
 **In one line:** the model has no clock. Stuffing `date` into the system
 prompt is the most direct fix — and it breaks the prefix cache every turn.
 Put session-stable `# Environment` up front; put per-turn time in
-`<agent-context>` that is never rewritten; keep precision to the minute.
-For each injected part, ask what breaks without it, whether it needs every
-turn, how precise it must be, and whether its position breaks the prompt cache.
+`<agent-context>` that is written into history and never rewritten; keep
+precision to the minute. For each injected part, ask what breaks without it,
+whether it needs every turn, how precise it must be, and whether its position
+breaks the prompt cache.
 
 **Companion skill:** `context-tax-audit` - inventory one real request, then
 check necessity, frequency, precision, position and cache impact.
