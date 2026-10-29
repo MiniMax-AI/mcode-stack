@@ -8,7 +8,7 @@ description: Run a harness change as a controlled experiment, with a small end-t
 Harness engineering moves forward by experiment. The principle:
 **measure first, change one thing at a time, keep what survives testing.**
 
-Companion to MCode Engineering Notes 01, 02 and 06.
+Companion to MCode Engineering Notes 01, 02 and 05.
 
 ## 1. Before changing anything
 

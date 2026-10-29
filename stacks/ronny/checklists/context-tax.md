@@ -1,6 +1,6 @@
 # Checklist: what you inject into every request
 
-From MCode Engineering Notes 06 (upcoming). Skill version: `skills/context-tax-audit`.
+From MCode Engineering Notes 05. Skill version: `skills/context-tax-audit`.
 
 | Item | Ask yourself |
 | --- | --- |

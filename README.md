@@ -182,7 +182,7 @@ change it. To suggest a change here, open an issue; see
 | 02 | [Too many tools will eat your context: from tool search to PTC](notes/02-tool-context.md) | `tool-budget-audit` |
 | 03 | [Keeping long sessions sharp: compaction vs. memory](notes/03-compaction-memory.md) | `long-session-check`, `handoff-doc` |
 | 04 | [How long should one bash command wait: from foreground blocking to background tasks](notes/04-bash-background.md) | `long-command-check` |
-| 06 | [The hidden tax on every turn: what an agent puts into context](notes/06-context-tax.md) *(upcoming)* | `context-tax-audit` |
+| 05 | [One small field can break the whole prefix cache](notes/05-prefix-cache.md) | `context-tax-audit` |
 
 ## Stacks
 
