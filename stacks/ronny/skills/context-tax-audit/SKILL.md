@@ -50,7 +50,6 @@ Rules of thumb:
 - Never rewrite reminders already in history; change only future turns.
 - Use only the precision you need. A timestamp to the second guarantees every
   copy differs.
-- Do not switch prompt or tool set mid-session unless you mean to pay for it.
 
 ## 4. Run the checklist
 
@@ -64,7 +63,6 @@ Rules of thumb:
 | History | Are reminders already in history ever rewritten later? |
 | Request-level reminders | Is the frequency of end-of-request reminders controlled? |
 | Recovery paths | If you remove something, does it vanish entirely on compaction, session resume or subagents? Who restores it? |
-| Mode consistency | Can the prompt or tool set change mid-session? |
 | Measurement | Before and after a change, do you look at cache hit rate, cost per turn and task quality, not just token count? |
 
 ## Output

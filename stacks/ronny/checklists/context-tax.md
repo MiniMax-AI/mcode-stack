@@ -12,5 +12,4 @@ From MCode Engineering Notes 05. Skill version: `skills/context-tax-audit`.
 | Don't edit history | Are reminders already written into history rewritten in later turns? |
 | Request-level reminders | Reminders attached only to the end of a request are paid at full price every time. Is their frequency controlled? |
 | Recovery | Does removed information disappear entirely on compaction, session resume or subagents? Who brings it back? |
-| Mode consistency | Can the prompt or tool set switch mid-session? |
 | Measurement | Before and after a change, do you look at cache hit rate, cost per turn and quality together? Token count alone is not enough. |
