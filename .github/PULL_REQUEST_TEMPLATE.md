@@ -19,4 +19,4 @@
 
 - [ ] No keys, tokens, internal hostnames or private links
 - [ ] Third-party content is credited with its license
-- [ ] I agree to release this under the repository's MIT License
+- [ ] I agree to release my own work here under the repository's MIT License (third-party material keeps its own license, noted in the stack's `NOTICE.md`)

@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="https://github.com/MiniMax-AI/mcode-stack/actions/workflows/validate.yml"><img alt="validate" src="https://github.com/MiniMax-AI/mcode-stack/actions/workflows/validate.yml/badge.svg"></a>
-  <a href="stacks/ronny/skills/"><img alt="skills: 15" src="https://img.shields.io/badge/skills-15-ff7a59.svg"></a>
+  <a href="stacks/"><img alt="skills: 17" src="https://img.shields.io/badge/skills-17-ff7a59.svg"></a>
   <a href="https://github.com/MiniMax-AI/minimax-code"><img alt="for MiniMax Code" src="https://img.shields.io/badge/for-MiniMax%20Code-5b6cff.svg"></a>
 </p>
 
@@ -109,6 +109,14 @@ other agents that support skills.
 | Experiments & hotfixes | [`harness-experiment`](stacks/ronny/skills/harness-experiment/SKILL.md) | Small eval, one change at a time, repeated runs, look at flipped tasks |
 | | [`trajectory-review`](stacks/ronny/skills/trajectory-review/SKILL.md) | Look at how the agent got its result, not only whether it passed |
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
+
+The table above is [`stacks/ronny`](stacks/ronny/).
+[`stacks/jiachen`](stacks/jiachen/) adds two more skills:
+[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md), which finds
+the loops where you keep acting as a manual step for your agents and lifts you
+out of them, and [`making-content`](stacks/jiachen/skills/making-content/SKILL.md),
+which turns notes and material into Xiaohongshu image posts and short vertical
+videos.
 
 A stack usually has three kinds of things:
 

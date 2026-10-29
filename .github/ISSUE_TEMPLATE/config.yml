@@ -1,1 +1,5 @@
 blank_issues_enabled: true
+contact_links:
+  - name: Bug or feature request for MiniMax Code itself
+    url: https://github.com/MiniMax-AI/minimax-code/issues
+    about: This repository only holds workflows and skills. Report problems with the MiniMax Code app or CLI there.

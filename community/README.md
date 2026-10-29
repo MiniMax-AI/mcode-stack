@@ -16,8 +16,12 @@ see how you actually work with MiniMax Code, or with any agent that supports
 1. Open a **New stack** issue first: who you are, how you use agents, and what
    you plan to include.
 2. Copy `templates/stack-template/` to `community/<your-id>/`.
-3. Run `node scripts/check.mjs` locally and paste the output into the PR.
-4. Include a short **real usage record** in the PR: the task where the agent
+3. Add an entry for it to
+   [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json)
+   (`"source": "./community/<your-id>"`, the same `description` as your
+   `plugin.json`).
+4. Run `node scripts/check.mjs` locally and paste the output into the PR.
+5. Include a short **real usage record** in the PR: the task where the agent
    used the skill, what the process looked like, and how it went. Show the
    process, not only the final result.
 
