@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="https://github.com/MiniMax-AI/mcode-stack/actions/workflows/validate.yml"><img alt="validate" src="https://github.com/MiniMax-AI/mcode-stack/actions/workflows/validate.yml/badge.svg"></a>
-  <a href="stacks/"><img alt="skills: 17" src="https://img.shields.io/badge/skills-17-ff7a59.svg"></a>
+  <a href="stacks/"><img alt="skills: stacks/" src="https://img.shields.io/badge/skills-stacks%2F-ff7a59.svg"></a>
   <a href="https://github.com/MiniMax-AI/minimax-code"><img alt="for MiniMax Code" src="https://img.shields.io/badge/for-MiniMax%20Code-5b6cff.svg"></a>
 </p>
 
@@ -70,7 +70,7 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 ## 里面有什么
 
 <p align="center">
-  <img src="docs/assets/skills-map-zh.png" alt="stacks/ronny 的 15 个 Skill，按一天里的场景分组" width="100%">
+  <img src="docs/assets/skills-map-zh.png" alt="stacks/ronny 的 Skill 按一天里的场景分组，以及 stacks/jiachen 里的 Skill" width="100%">
 </p>
 
 | 场景 | Skill | 做什么 |
@@ -91,7 +91,7 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 | | [`trajectory-review`](stacks/ronny/skills/trajectory-review/SKILL.md) | 不只看结果过没过，回头看 agent 是怎么得到这个结果的 |
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | 判断 hotfix 是不是真紧急，紧急时怎么快审又不丢质量 |
 
-上表是 [`stacks/ronny`](stacks/ronny/) 的内容。[`stacks/jiachen`](stacks/jiachen/) 另有两个 Skill：[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md) 找出你总在给 agent 当「人工环节」的那些循环，帮你从里面抽身；[`making-content`](stacks/jiachen/skills/making-content/SKILL.md) 把笔记和素材做成小红书图文和竖版短视频。
+上表是 [`stacks/ronny`](stacks/ronny/) 的内容。[`stacks/jiachen`](stacks/jiachen/) 里还有：[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md) 找出你总在给 agent 当「人工环节」的那些循环，帮你从里面抽身；[`making-content`](stacks/jiachen/skills/making-content/SKILL.md) 把笔记和素材做成小红书图文和竖版短视频。
 
 每个 stack 里一般有三类东西：
 
@@ -151,4 +151,4 @@ MiniMax Code 本体在 [MiniMax-AI/minimax-code](https://github.com/MiniMax-AI/m
 
 ## License
 
-[MIT](LICENSE)，各 stack 的 `NOTICE.md` 另有说明的除外。六个 `engineering-*` Skill 改编自 Google Engineering Practices，改编部分仍遵循 CC-BY 3.0，详见 [`stacks/ronny/NOTICE.md`](stacks/ronny/NOTICE.md)。
+[MIT](LICENSE)，各 stack 的 `NOTICE.md` 另有说明的除外。`engineering-*` 系列 Skill 改编自 Google Engineering Practices，改编部分仍遵循 CC-BY 3.0，详见 [`stacks/ronny/NOTICE.md`](stacks/ronny/NOTICE.md)。

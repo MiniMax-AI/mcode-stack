@@ -4,10 +4,10 @@ Each directory here is one MiniMax Code team member's stack: the workflows
 and skills they actually use to build MiniMax Code. Each stack is also a
 MiniMax Code plugin package.
 
-| Stack | Owner | Status |
+| Stack | Owner | What it has |
 | --- | --- | --- |
-| [`ronny`](ronny/) | Ronny, R&D lead | 15 skills, 5 checklists |
-| [`jiachen`](jiachen/) | Jiachen, engineer | 2 skills |
+| [`ronny`](ronny/) | Ronny, R&D lead | Skills and plain-text checklists |
+| [`jiachen`](jiachen/) | Jiachen, engineer | Skills and a `WORKFLOW.md` |
 
 Teammates are welcome to add their own; see below.
 

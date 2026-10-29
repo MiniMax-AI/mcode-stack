@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="https://github.com/MiniMax-AI/mcode-stack/actions/workflows/validate.yml"><img alt="validate" src="https://github.com/MiniMax-AI/mcode-stack/actions/workflows/validate.yml/badge.svg"></a>
-  <a href="stacks/"><img alt="skills: 17" src="https://img.shields.io/badge/skills-17-ff7a59.svg"></a>
+  <a href="stacks/"><img alt="skills: stacks/" src="https://img.shields.io/badge/skills-stacks%2F-ff7a59.svg"></a>
   <a href="https://github.com/MiniMax-AI/minimax-code"><img alt="for MiniMax Code" src="https://img.shields.io/badge/for-MiniMax%20Code-5b6cff.svg"></a>
 </p>
 
@@ -89,7 +89,7 @@ other agents that support skills.
 ## What's inside
 
 <p align="center">
-  <img src="docs/assets/skills-map.png" alt="The 15 skills in stacks/ronny, grouped by moment in the day" width="100%">
+  <img src="docs/assets/skills-map.png" alt="The skills in stacks/ronny, grouped by moment in the day, plus what stacks/jiachen adds" width="100%">
 </p>
 
 | When | Skill | What it does |
@@ -111,7 +111,7 @@ other agents that support skills.
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
 
 The table above is [`stacks/ronny`](stacks/ronny/).
-[`stacks/jiachen`](stacks/jiachen/) adds two more skills:
+[`stacks/jiachen`](stacks/jiachen/) adds
 [`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md), which finds
 the loops where you keep acting as a manual step for your agents and lifts you
 out of them, and [`making-content`](stacks/jiachen/skills/making-content/SKILL.md),
@@ -191,7 +191,7 @@ repository only holds workflows and skills, no MiniMax Code source code.
 
 ## License
 
-[MIT](LICENSE), except where a stack's `NOTICE.md` says otherwise. The six
+[MIT](LICENSE), except where a stack's `NOTICE.md` says otherwise. The
 `engineering-*` skills are adapted from Google Engineering Practices; the
 adapted material stays under CC-BY 3.0. See
 [`stacks/ronny/NOTICE.md`](stacks/ronny/NOTICE.md).
