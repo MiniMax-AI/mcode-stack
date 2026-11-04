@@ -112,6 +112,10 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 | | [`engineering-review-feedback`](stacks/ronny/skills/engineering-review-feedback/SKILL.md) | 作为作者处理 review 意见：改代码、补说明、化解分歧 |
 | 实验与紧急修复 | [`harness-experiment`](stacks/ronny/skills/harness-experiment/SKILL.md) | 小 eval、一次只改一处、多跑几次、看哪些任务翻转了 |
 | | [`trajectory-review`](stacks/ronny/skills/trajectory-review/SKILL.md) | 不只看结果过没过，回头看 agent 是怎么得到这个结果的 |
+| 对 agent 的产出负责 | [`agent-brief`](stacks/ronny/skills/agent-brief/SKILL.md) | 交给 agent 之前：定风险高低，先写自己的猜测，用自己的话写清范围，事先说好怎样算验证过 |
+| | [`evidence-first-review`](stacks/ronny/skills/evidence-first-review/SKILL.md) | agent 说做完了：先看它跑过的命令和输出，再看总结；问清它默默做了哪些决定 |
+| | [`review-capacity-check`](stacks/ronny/skills/review-capacity-check/SKILL.md) | 再开一个会话之前，先看手上做完却还没人把关的活有多少 |
+| | [`taste-to-checks`](stacks/ronny/skills/taste-to-checks/SKILL.md) | 同样的意见提了两次，就写成测试、lint、hook 或 CI |
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | 判断 hotfix 是不是真紧急，紧急时怎么快审又不丢质量 |
 
 上表是 [`stacks/ronny`](stacks/ronny/) 的内容。[`stacks/jiachen`](stacks/jiachen/) 里还有：[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md) 找出你总在给 agent 当「人工环节」的那些循环，帮你从里面抽身；[`making-content`](stacks/jiachen/skills/making-content/SKILL.md) 把笔记和素材做成小红书图文和竖版短视频。
