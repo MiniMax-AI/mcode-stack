@@ -1,6 +1,6 @@
 ---
 name: taste-to-checks
-description: Turn a review correction we keep making on agent output into something that runs on its own, a test, lint rule, hook, CI step or project rule, so the miss does not come back next session. Use when we correct the same kind of mistake in agent work a second time, or after a review finds a miss that a check could have caught.
+description: Turn a review correction we keep making on agent output into something that runs on its own, a test, lint rule, hook, CI step or project rule, so the miss does not come back next session. Use when we keep correcting agents on the same mistake (import order, naming, a forbidden API, a missing test), when the same review comment shows up on a second PR, or after a review finds a miss that a check could have caught.
 ---
 
 # Taste to Checks
