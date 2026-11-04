@@ -49,6 +49,10 @@ shown by `mcode plugin marketplace list`, or copy single skills into
 | [`long-command-check`](skills/long-command-check/SKILL.md) | Ten-point audit of how an agent runs long shell commands and background tasks | 04 |
 | [`context-tax-audit`](skills/context-tax-audit/SKILL.md) | Inventory what is injected into every request and how it affects the prompt cache | 05 |
 | [`trajectory-review`](skills/trajectory-review/SKILL.md) | Review how the agent got its result, not only whether it passed | - |
+| [`agent-brief`](skills/agent-brief/SKILL.md) | Before delegating: stakes, our own hypothesis, scope in our words, what "verified" means, and the mode | - |
+| [`evidence-first-review`](skills/evidence-first-review/SKILL.md) | When an agent says done: evidence before summary, what each check misses, its silent decisions, try to break it | - |
+| [`review-capacity-check`](skills/review-capacity-check/SKILL.md) | Before launching more sessions: is finished work piling up faster than we can stand behind it | - |
+| [`taste-to-checks`](skills/taste-to-checks/SKILL.md) | Turn a correction we keep making into a test, lint, hook or CI step, proven on the old mistake | - |
 
 ### Engineering practice
 

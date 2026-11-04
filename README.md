@@ -138,6 +138,10 @@ other agents that support skills.
 | | [`engineering-review-feedback`](stacks/ronny/skills/engineering-review-feedback/SKILL.md) | Handle reviewer comments as the author: fix, clarify, resolve disagreements |
 | Experiments & hotfixes | [`harness-experiment`](stacks/ronny/skills/harness-experiment/SKILL.md) | Small eval, one change at a time, repeated runs, look at flipped tasks |
 | | [`trajectory-review`](stacks/ronny/skills/trajectory-review/SKILL.md) | Look at how the agent got its result, not only whether it passed |
+| Owning agent work | [`agent-brief`](stacks/ronny/skills/agent-brief/SKILL.md) | Before delegating: stakes, hypothesis, scope, what "verified" means |
+| | [`evidence-first-review`](stacks/ronny/skills/evidence-first-review/SKILL.md) | When an agent says done: evidence first, what checks miss, silent decisions |
+| | [`review-capacity-check`](stacks/ronny/skills/review-capacity-check/SKILL.md) | Don't launch more agents than we can stand behind |
+| | [`taste-to-checks`](stacks/ronny/skills/taste-to-checks/SKILL.md) | Turn a repeat correction into a test, lint, hook or CI step |
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
 
 The table above is [`stacks/ronny`](stacks/ronny/).
