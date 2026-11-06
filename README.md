@@ -43,9 +43,9 @@ Inside a Claude Code session:
 /plugin install ronny --marketplace MiniMax-AI/mcode-stack
 ```
 
-Use `jiachen` in place of `ronny` for that stack. From a clone of this
+Use `jiachen` or `req-tpm` in place of `ronny` for those stacks. From a clone of this
 repository, `scripts/install.sh` installs `ronny` (`scripts/install.sh jiachen`
-for that stack) with `claude` or `codex` when either is on `PATH`, and
+or `scripts/install.sh req-tpm` for the others) with `claude` or `codex` when either is on `PATH`, and
 otherwise copies that stack's skills into `~/.agents/skills/`.
 
 Older Claude Code can add the marketplace first, then install:
@@ -63,7 +63,7 @@ codex plugin marketplace add MiniMax-AI/mcode-stack
 codex plugin add ronny@mcode-stack
 ```
 
-Substitute `jiachen` the same way. To take a single skill instead of the
+Substitute `jiachen` or `req-tpm` the same way. To take a single skill instead of the
 plugin, copy that skill's folder into `~/.agents/skills/`. Codex and MiniMax
 Code both scan that directory; the copy steps are below.
 
@@ -152,6 +152,17 @@ out of them, and [`making-content`](stacks/jiachen/skills/making-content/SKILL.m
 which turns notes and material into Xiaohongshu image posts and short vertical
 videos.
 
+[`stacks/req-tpm`](stacks/req-tpm/) is an optional stack for requirement
+management. The person who raises a product or technical requirement acts as
+its TPM together with their own agent: challenge it at intake and fix a
+measurable expected outcome, get a priority decision from the owner, record
+the design decision, track it on a cadence and flag stale items, pass ship
+gates, and close only with evidence against the expected outcome. The body
+lives in a Feishu doc; status and flow live in Meegle (Feishu Project). It is
+v0 and needs the `meegle` and `lark-cli` CLIs plus a one-time look-up of your
+Meegle space's fields and states; see
+[`stacks/req-tpm/README.md`](stacks/req-tpm/README.md).
+
 A stack usually has three kinds of things:
 
 | Kind | What it is | How to use it |
@@ -201,8 +212,8 @@ templates/stack-template/   Template for a new stack
 ```
 
 Every stack is also a MiniMax Code plugin package. See
-[`stacks/ronny`](stacks/ronny/) and [`stacks/jiachen`](stacks/jiachen/) for
-what each one contains.
+[`stacks/ronny`](stacks/ronny/), [`stacks/jiachen`](stacks/jiachen/) and
+[`stacks/req-tpm`](stacks/req-tpm/) for what each one contains.
 
 ## Contributing
 

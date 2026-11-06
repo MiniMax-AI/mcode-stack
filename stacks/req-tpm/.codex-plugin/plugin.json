@@ -1,6 +1,6 @@
 {
   "name": "req-tpm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Requirement management where the requester and their agent act as the requirement's TPM: intake with a measurable expected outcome, priority recommendation for the owner, design decision record, cadence tracking that flags stale items, ship readiness, and evidence-based outcome review. Body in a Feishu doc, status in Meegle.",
   "author": {
     "name": "MiniMax Code team"

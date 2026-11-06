@@ -36,7 +36,7 @@ claude plugin install ronny --marketplace MiniMax-AI/mcode-stack
 /plugin install ronny --marketplace MiniMax-AI/mcode-stack
 ```
 
-装 Jiachen 的 stack 时，把 `ronny` 换成 `jiachen`。克隆本仓库后可以跑 `scripts/install.sh`（默认 `ronny`，或 `scripts/install.sh jiachen`）：`PATH` 里有 `claude` 或 `codex` 时，它会执行同样的安装，否则把该 stack 的 Skill 复制到 `~/.agents/skills/`。
+装 Jiachen 的 stack 时，把 `ronny` 换成 `jiachen`；装需求管理的 stack 时换成 `req-tpm`。克隆本仓库后可以跑 `scripts/install.sh`（默认 `ronny`，或 `scripts/install.sh jiachen`、`scripts/install.sh req-tpm`）：`PATH` 里有 `claude` 或 `codex` 时，它会执行同样的安装，否则把该 stack 的 Skill 复制到 `~/.agents/skills/`。
 
 较旧的 Claude Code 可以先加市场，再安装：
 
@@ -120,6 +120,8 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 
 上表是 [`stacks/ronny`](stacks/ronny/) 的内容。[`stacks/jiachen`](stacks/jiachen/) 里还有：[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md) 找出你总在给 agent 当「人工环节」的那些循环，帮你从里面抽身；[`making-content`](stacks/jiachen/skills/making-content/SKILL.md) 把笔记和素材做成小红书图文和竖版短视频。
 
+[`stacks/req-tpm`](stacks/req-tpm/README_ZH.md) 是一份可选的需求管理 stack：谁提的产品或技术需求，谁就和自己的 agent 一起当这条需求的 TPM。受理时先追问该不该做，写死可衡量的预期效果；优先级交给负责人拍板；记下方案决策；按节奏跟进，停滞的显式标出来；上线前过检查项；最后拿证据对照预期效果才关闭。需求正文放飞书文档，状态和流转放飞书项目（Meegle）。目前是 v0，需要 `meegle` 和 `lark-cli`，并先在自己的 Meegle 空间里查一遍字段和状态，见 [`stacks/req-tpm/README_ZH.md`](stacks/req-tpm/README_ZH.md)。
+
 每个 stack 里一般有三类东西：
 
 | 类型 | 是什么 | 怎么用 |
@@ -160,7 +162,7 @@ community/                  团队外的 stack，由协作者加进来
 templates/stack-template/   新增 stack 用的模板
 ```
 
-每份 stack 本身也是一个 MiniMax Code 插件包，具体内容见 [`stacks/ronny`](stacks/ronny/) 和 [`stacks/jiachen`](stacks/jiachen/)。
+每份 stack 本身也是一个 MiniMax Code 插件包，具体内容见 [`stacks/ronny`](stacks/ronny/)、[`stacks/jiachen`](stacks/jiachen/) 和 [`stacks/req-tpm`](stacks/req-tpm/README_ZH.md)。
 
 ## 参与贡献
 
