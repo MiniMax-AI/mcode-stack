@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "name": "req-tpm",
+  "version": "0.1.0",
+  "displayName": "Requirement TPM",
+  "description": "Requirement management where the requester and their agent act as the requirement's TPM: intake with a measurable expected outcome, priority recommendation for the owner, design decision record, cadence tracking that flags stale items, ship readiness, and evidence-based outcome review. Body in a Feishu doc, status in Meegle.",
+  "author": "MiniMax Code team",
+  "icon": "icon.png",
+  "category": "Productivity",
+  "exampleQueries": [
+    "帮我把这个需求受理一下：建文档和工作项",
+    "这个需求该不该插到本迭代？",
+    "这个需求上线一周了，效果达成了吗？"
+  ],
+  "apps": [],
+  "mcpServers": [],
+  "skills": [
+    "skills/req-intake/SKILL.md",
+    "skills/req-prioritize/SKILL.md",
+    "skills/req-design/SKILL.md",
+    "skills/req-track/SKILL.md",
+    "skills/req-ship/SKILL.md",
+    "skills/req-outcome/SKILL.md"
+  ]
+}
