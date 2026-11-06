@@ -193,6 +193,7 @@ change it. To suggest a change here, open an issue; see
 ```text
 stacks/ronny/               Ronny's stack (MiniMax Code R&D lead), the first and most complete one
 stacks/jiachen/             Jiachen's stack: getting out of the agent loop, and turning notes into posts and videos
+stacks/req-tpm/             Optional: the requester and their agent act as a requirement's TPM (Feishu doc body, Meegle status); v0
 stacks/<name>/              One directory per team member; teammates are welcome to add theirs
 notes/                      Which runnable piece goes with each Engineering Notes article
 community/                  Stacks from outside the team, added by collaborators

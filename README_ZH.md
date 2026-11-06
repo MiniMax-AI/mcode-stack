@@ -153,6 +153,7 @@ AI 写代码越来越快，真正拉开差距的，是围绕 agent 的那一圈�
 ```text
 stacks/ronny/               MiniMax Code 研发负责人 Ronny 的日常工作流，第一份，也是目前最完整的一份
 stacks/jiachen/             Jiachen 的工作流：把自己从 agent 的循环里解放出来，以及把笔记做成图文和短视频
+stacks/req-tpm/             可选：需求提出人和自己的 agent 一起当这条需求的 TPM（正文在飞书文档，状态在 Meegle），v0
 stacks/<name>/              每位成员一个目录，欢迎团队同事把自己的也放进来
 notes/                      「MCode 工程笔记」每一篇对应哪一份能跑的东西
 community/                  团队外的 stack，由协作者加进来
