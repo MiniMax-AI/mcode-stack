@@ -1,46 +1,77 @@
 # req-tpm
 
-让需求提出人和自己的 Agent 一起，当这个需求的 TPM：从提出到效果验收，全程有文档、有工作项、有人在跟，不会悄悄丢掉。
+English | [中文](README_ZH.md)
 
-需求正文放飞书文档，状态和流转放飞书项目（Meegle）。每个 skill 都可以单独装、单独用，同时维护两边。
+`req-tpm` lets the person who raises a requirement act as its TPM, together
+with their own agent. Every product or technical requirement gets a doc, a
+work item and someone following it, from intake to the outcome review, so
+nothing gets dropped quietly.
 
-## 生命周期
+The requirement body lives in a Feishu doc. Status and flow live in Meegle
+(Feishu Project). Each skill installs and runs on its own, and keeps both
+sides in step.
+
+> **v0, optional.** This stack has not yet been run against a real Meegle
+> space. The field mapping separates keys confirmed in the `meegle` CLI's own
+> docs from project-specific fields, roles and states, which are assumptions
+> until you look them up in your space.
+
+## Lifecycle
 
 ```mermaid
 flowchart LR
-  A[req-intake<br/>该不该做<br/>预期效果] --> B[req-prioritize<br/>成本/影响/风险<br/>负责人拍板]
-  B --> C[req-design<br/>选项与决策<br/>波及面/检查点]
-  C --> D[req-track<br/>进展/阻塞/下一步<br/>停滞显式标出]
-  D --> E[req-ship<br/>回滚/可观测/DoD<br/>推进状态]
-  E --> F[req-outcome<br/>对照预期效果<br/>有证据才关闭]
-  F -- 未达成 --> C
-  A -- 建议不做 --> X[关闭并记录原因]
-  D -. 停滞 .-> D
+  A[req-intake<br/>worth doing?<br/>expected outcome] --> B[req-prioritize<br/>cost / impact / risk<br/>owner decides]
+  B --> C[req-design<br/>options and decision<br/>blast radius / checkpoints]
+  C --> D[req-track<br/>progress / blockers / next step<br/>flag stale items]
+  D --> E[req-ship<br/>rollback / observability / DoD<br/>move status]
+  E --> F[req-outcome<br/>compare with expected outcome<br/>close only with evidence]
+  F -- not met --> C
+  A -- recommend not doing --> X[close and record why]
+  D -. stale .-> D
 ```
 
-| 阶段 | Skill | 产出写到文档哪一节 |
+| Phase | Skill | Writes to doc sections |
 | --- | --- | --- |
-| 受理 | `req-intake` | 1–3 |
-| 排期 | `req-prioritize` | 4 |
-| 方案 | `req-design` | 5–6 |
-| 跟进 | `req-track` | 7 |
-| 上线 | `req-ship` | 8 |
-| 验收 | `req-outcome` | 9 |
+| Intake | [`req-intake`](skills/req-intake/SKILL.md) | 1–3 |
+| Prioritize | [`req-prioritize`](skills/req-prioritize/SKILL.md) | 4 |
+| Design | [`req-design`](skills/req-design/SKILL.md) | 5–6 |
+| Track | [`req-track`](skills/req-track/SKILL.md) | 7 |
+| Ship | [`req-ship`](skills/req-ship/SKILL.md) | 8 |
+| Outcome | [`req-outcome`](skills/req-outcome/SKILL.md) | 9 |
 
-## 几条规则
+## Rules we follow
 
-- 预期效果在受理时就写死：指标、基线、目标、测法、观察窗口。最后用它验收。
-- 提出人提建议，负责人做优先级决定。Agent 不改别人需求的优先级。
-- 停滞本身是一条信息：报告里置顶，不自动催人，也不沉默。
-- 上线不等于完成。只有拿到效果证据才关闭。
-- 对外可见的写操作（评论、@人、状态流转）先给提出人看，确认后执行。
+- The expected outcome is fixed at intake: metric, baseline, target, how we
+  measure it, and the observation window. The requirement is judged against it
+  at the end.
+- The requester recommends; the owner decides priority. The agent does not
+  change the priority of someone else's requirement.
+- A stale item is information. It goes to the top of the report. We don't
+  nudge people automatically, and we don't stay silent either.
+- Shipping is not done. A requirement closes only with evidence of the
+  outcome.
+- Anything visible to others (comments, @-mentions, status transitions) is
+  shown to the requester first and runs only after they confirm.
 
-## 依赖
+## Dependencies
 
-- `meegle` CLI（飞书项目），已登录；字段和状态见 [`templates/meegle-field-mapping.md`](templates/meegle-field-mapping.md)。
-- `lark-cli`，以用户身份（`--as user`）读写飞书文档。
-- 需求文档模板：[`templates/requirement-doc.md`](templates/requirement-doc.md)。
+- The `meegle` CLI (Feishu Project), logged in. Fields and states are in
+  [`templates/meegle-field-mapping.md`](templates/meegle-field-mapping.md);
+  replace every entry marked as an assumption before the first real write.
+- `lark-cli`, reading and writing Feishu docs as the user (`--as user`).
+- The requirement doc template:
+  [`templates/requirement-doc.md`](templates/requirement-doc.md).
 
----
+## Usage
 
-**English.** `req-tpm` lets whoever raises a requirement act as its TPM together with their own agent: challenge it at intake and write a measurable expected outcome, get a priority decision from the owner, record the design decision and blast radius, track status on a cadence and flag stale items, check rollback/observability/DoD before shipping, and close only with evidence against the expected outcome. The body lives in a Feishu doc; status lives in Meegle (Feishu Project). Each skill installs on its own.
+Install the whole stack:
+
+```bash
+claude plugin install req-tpm --marketplace MiniMax-AI/mcode-stack
+codex plugin add req-tpm@mcode-stack     # after: codex plugin marketplace add MiniMax-AI/mcode-stack
+scripts/install.sh req-tpm               # from a clone of this repository
+```
+
+Or copy one skill, such as `stacks/req-tpm/skills/req-intake`, into
+`~/.agents/skills/`. Start with `/req-intake` when someone raises a
+requirement. [`WORKFLOW.md`](WORKFLOW.md) lists which skill fits which moment.
