@@ -36,7 +36,7 @@ claude plugin install ronny --marketplace MiniMax-AI/mcode-stack
 /plugin install ronny --marketplace MiniMax-AI/mcode-stack
 ```
 
-装 Jiachen 的 stack 时，把 `ronny` 换成 `jiachen`；装需求管理的 stack 时换成 `req-tpm`。克隆本仓库后可以跑 `scripts/install.sh`（默认 `ronny`，或 `scripts/install.sh jiachen`、`scripts/install.sh req-tpm`）：`PATH` 里有 `claude` 或 `codex` 时，它会执行同样的安装，否则把该 stack 的 Skill 复制到 `~/.agents/skills/`。
+装 Jiachen 的 stack 时，把 `ronny` 换成 `jiachen`；装需求管理的 stack 时换成 `req-tpm`；装 Youfang 的 stack 时换成 `youfang`。克隆本仓库后可以跑 `scripts/install.sh`（默认 `ronny`，或 `scripts/install.sh jiachen`、`scripts/install.sh req-tpm`、`scripts/install.sh youfang`）：`PATH` 里有 `claude` 或 `codex` 时，它会执行同样的安装，否则把该 stack 的 Skill 复制到 `~/.agents/skills/`。
 
 较旧的 Claude Code 可以先加市场，再安装：
 
@@ -52,7 +52,7 @@ codex plugin marketplace add MiniMax-AI/mcode-stack
 codex plugin add ronny@mcode-stack
 ```
 
-把 `ronny` 换成 `jiachen` 即可。如果只要某一个 Skill，把它的目录复制到 `~/.agents/skills/`。Codex 和 MiniMax Code 都会扫描这个目录，复制步骤见下文。
+把 `ronny` 换成 `jiachen`、`req-tpm` 或 `youfang` 即可。如果只要某一个 Skill，把它的目录复制到 `~/.agents/skills/`。Codex 和 MiniMax Code 都会扫描这个目录，复制步骤见下文。
 
 **装一个 Skill，所有项目都能用：**
 
@@ -122,6 +122,8 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 
 [`stacks/req-tpm`](stacks/req-tpm/README_ZH.md) 是一份可选的需求管理 stack：谁提的产品或技术需求，谁就和自己的 agent 一起当这条需求的 TPM。受理时先追问该不该做，写死可衡量的预期效果；优先级交给负责人拍板；记下方案决策；按节奏跟进，停滞的显式标出来；上线前过检查项；最后拿证据对照预期效果才关闭。需求正文放飞书文档，状态和流转放飞书项目（Meegle）。目前是 v0，需要 `meegle` 和 `lark-cli`，并先在自己的 Meegle 空间里查一遍字段和状态，见 [`stacks/req-tpm/README_ZH.md`](stacks/req-tpm/README_ZH.md)。
 
+[`stacks/youfang`](stacks/youfang/) 里有 [`magic-move-deck`](stacks/youfang/skills/magic-move-deck/SKILL.md)：把一次架构或流程讲解做成 Keynote 式「神奇移动」演示，每一页都是某张图加一个镜头取景，前后页共有的框和标题直接变形飞过去。agent 先用四种风格（手绘、简约、暗色科技、新野兽派）各出一张样张，你选定后再按这种风格做完整的单文件离线 HTML。
+
 每个 stack 里一般有三类东西：
 
 | 类型 | 是什么 | 怎么用 |
@@ -156,13 +158,14 @@ AI 写代码越来越快，真正拉开差距的，是围绕 agent 的那一圈�
 stacks/ronny/               MiniMax Code 研发负责人 Ronny 的日常工作流，第一份，也是目前最完整的一份
 stacks/jiachen/             Jiachen 的工作流：把自己从 agent 的循环里解放出来，以及把笔记做成图文和短视频
 stacks/req-tpm/             可选：需求提出人和自己的 agent 一起当这条需求的 TPM（正文在飞书文档，状态在 Meegle），v0
+stacks/youfang/             Youfang 的工作流：把架构讲解做成「神奇移动」演示，四种风格可选
 stacks/<name>/              每位成员一个目录，欢迎团队同事把自己的也放进来
 notes/                      「MCode 工程笔记」每一篇对应哪一份能跑的东西
 community/                  团队外的 stack，由协作者加进来
 templates/stack-template/   新增 stack 用的模板
 ```
 
-每份 stack 本身也是一个 MiniMax Code 插件包，具体内容见 [`stacks/ronny`](stacks/ronny/)、[`stacks/jiachen`](stacks/jiachen/) 和 [`stacks/req-tpm`](stacks/req-tpm/README_ZH.md)。
+每份 stack 本身也是一个 MiniMax Code 插件包，具体内容见 [`stacks/ronny`](stacks/ronny/)、[`stacks/jiachen`](stacks/jiachen/)、[`stacks/req-tpm`](stacks/req-tpm/README_ZH.md) 和 [`stacks/youfang`](stacks/youfang/)。
 
 ## 参与贡献
 

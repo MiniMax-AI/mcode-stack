@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<!--
+  Magic Move deck style: handdrawn (手绘)
+  Adapted from the handdrawn-diagram template (https://github.com/TrentChou/handdrawn-diagram, MIT).
+  - rough.js based shapes (hand-drawn jittered lines + solid light fill; hachure available as override)
+  - Conventional print typography: Chinese 宋体 / 中宋, Latin Times New Roman
+  - 9-role palette + shape helpers (box / channel / taskCard / bubble / hexagon / timeline / frame) + node() + legend()
+  - Hard rules: no emoji; Latin = Times New Roman, CN = Songti family, never sans-serif / script / handwritten
+  - Edit main() at the bottom to draw your own diagram. Keep helpers untouched: every style template exposes
+    the same helper names and signatures, so one main() renders in any style (scripts/styles.py).
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Web fallback: Noto Serif SC (思源宋体) for systems without Songti / SimSun.
+     Times New Roman ships with Windows and macOS (Linux falls back to serif); no Web load needed. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  /* Font stack discipline: put Latin (Times New Roman) FIRST,
+     then Chinese (中宋 -> 宋体 -> 思源宋体), then `serif` fallback.
+     Browser does per-character matching: English chars hit Times,
+     CJK chars skip Times and hit Songti / Zhongsong. NEVER use cursive
+     or sans-serif as fallback — those route to system handwriting / Heiti
+     and break the print-text aesthetic. */
+  body { margin: 0; background: #fdfdfa;
+    font-family: 'Times New Roman', Times, 'Songti SC', 'STSong', 'SimSun', '宋体', 'Noto Serif SC', serif; }
+  .stage { position: relative; background: #fdfdfa; }
+  canvas { display: block; }
+  .label { position: absolute; pointer-events: none; line-height: 1.22; }
+  /* Title / emphasis: Zhongsong (中宋) for Chinese, Times bold for Latin */
+  .ti { font-family: 'Times New Roman', Times, 'STZhongsong', '华文中宋', 'Songti SC', 'SimSun', '宋体', 'Noto Serif SC', serif; font-weight: 700; }
+  /* Body / sub-label: Songti for Chinese, Times regular for Latin */
+  .bd { font-family: 'Times New Roman', Times, 'Songti SC', 'STSong', 'SimSun', '宋体', 'Noto Serif SC', serif; font-weight: 400; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"
+        integrity="sha384-1NLkwxMO2sOqcq7rQkFBhIAUJtbt8ziLxhVKVgKfFGMEU8pF+GEq5LVogviveup6"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<!-- Set canvas size to whatever your diagram needs -->
+<div class="stage" style="width: 1920px; height: 1080px;">
+  <canvas id="c" width="1920" height="1080"></canvas>
+  <div id="labels"></div>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const rc = rough.canvas(canvas);
+
+// Canonical font stacks — keep in sync with CSS .ti / .bd above.
+const FONT_TI = `'Times New Roman', Times, 'STZhongsong', '华文中宋', 'Songti SC', 'SimSun', '宋体', 'Noto Serif SC', serif`;
+const FONT_BD = `'Times New Roman', Times, 'Songti SC', 'STSong', 'SimSun', '宋体', 'Noto Serif SC', serif`;
+
+// ============================================================
+//  PALETTE — 9 fixed roles (low-saturation warm version on ivory).
+//  Same role uses the same color across every diagram in the article.
+//  stroke = node-internal text color too. WCAG ≥ 4.5:1 vs fill.
+//  See STYLE.md (next to this template) for the contrast table.
+// ============================================================
+const C = {
+  user:     { stroke: '#1f5582', fill: '#e3ebf2' },  // 钢蓝 / 雾蓝     6.5:1
+  im:       { stroke: '#106668', fill: '#dde8e7' },  // 墨青 / 雾青     5.4:1
+  agent:    { stroke: '#a04a1f', fill: '#f3e2cf' },  // 砖橙 / 米橙     4.7:1 (主角)
+  subagent: { stroke: '#7d4f0a', fill: '#f4eacd' },  // 焦糖 / 麦黄     5.8:1
+  llm:      { stroke: '#4a3f8c', fill: '#e6e2ef' },  // 靛紫 / 雾紫     6.9:1
+  tools:    { stroke: '#2f6b3c', fill: '#dfead9' },  // 苔绿 / 雾绿     5.1:1
+  memory:   { stroke: '#6e554a', fill: '#ede2d5' },  // 栗棕 / 牛皮     5.4:1
+  external: { stroke: '#4f5359', fill: '#e9e7e3' },  // 墨灰 / 暖灰     6.3:1
+  error:    { stroke: '#a52928', fill: '#f0d8d2' },  // 砖红 / 浅赭     5.2:1 (异常专用)
+  flow:     '#3a3530',                                // 暖墨色 — 所有箭头
+  bg:       '#fdfdfa',                                // 暖米白 — 画布底色
+  title:    '#2a2520',                                // 暖墨黑 — 大标题
+  subtitle: '#5a544f',                                // 暖中灰 — 副标
+  caption:  '#7a746e',                                // 暖浅灰 — 图例小字
+  glow:     null,                                     // deck: CSS filter on every shape (none for this style)
+  // Cover / closing card palette + the deck's frosted glass behind it (keynote.html reads it via build_deck.py)
+  card: { stroke: '#1f5582', fill: 'rgba(245,248,251,0.6)', accent: '#2f6f9f', title: '#163d5e',
+          text: '#2a2520', muted: '#5a544f',
+          glass: 'linear-gradient(160deg, rgba(31,85,130,.22) 0%, rgba(120,160,195,.18) 38%, rgba(227,235,242,.40) 70%, rgba(253,253,250,.55) 100%)',
+          pane: 'rgba(253,253,250,.42)', shadow: '0 26px 70px rgba(20,40,60,.14), 0 4px 14px rgba(20,40,60,.06)' },
+};
+
+// ============================================================
+//  STYLE OPTIONS — rough.js baseline: bold stroke, high roughness, visible bowing
+//  Default fillStyle = 'solid' (clean light fill behind text).
+//  Hachure (斜线填充) leaves diagonal noise behind labels — small text on
+//  phones gets eaten by the lines. Use hachure ONLY for shapes WITHOUT
+//  text inside (pure decorative blocks). Override per-shape:
+//    opts(C.agent, { fillStyle: 'hachure', hachureGap: 9, hachureAngle: -41 })
+// ============================================================
+const opts = (color, o = {}) => Object.assign({
+  stroke: color.stroke,
+  fill:   color.fill,
+  fillStyle: 'solid',
+  strokeWidth: 2.4,
+  roughness: 1.6,
+  bowing: 1.4,
+}, o);
+
+// ============================================================
+//  ARROW — solid by default; pass { strokeLineDash: [10,7] } for dashed
+//  Pass o = { stroke: C.error.stroke, strokeLineDash: [10,7] } for error path
+// ============================================================
+function arrow(x1, y1, x2, y2, o = {}) {
+  const op = Object.assign({ stroke: C.flow, strokeWidth: 2, roughness: 1.4 }, o);
+  rc.line(x1, y1, x2, y2, op);
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  const L = 14;
+  const headOpts = Object.assign({}, op, { strokeLineDash: undefined });
+  rc.line(x2, y2, x2 - L * Math.cos(a - Math.PI/6), y2 - L * Math.sin(a - Math.PI/6), headOpts);
+  rc.line(x2, y2, x2 - L * Math.cos(a + Math.PI/6), y2 - L * Math.sin(a + Math.PI/6), headOpts);
+}
+
+// ============================================================
+//  SHAPE HELPERS
+// ============================================================
+// Box — generic rectangle entity (Service / Agent / Resource)
+function box(x, y, w, h, color, override = {}) {
+  rc.rectangle(x, y, w, h, opts(color, override));
+}
+
+// Channel — flat horizontal strip (IM / Queue / Bus)
+function channel(x, y, w, h, color) {
+  rc.rectangle(x, y, w, h, opts(color, { strokeWidth: 2.2 }));
+}
+
+// Task Card — folded-corner note (work unit / job / task)
+function taskCard(x, y, w, h, color) {
+  const fold = 14;
+  const path = `M${x} ${y} L${x+w-fold} ${y} L${x+w} ${y+fold} L${x+w} ${y+h} L${x} ${y+h} Z`;
+  rc.path(path, opts(color, { strokeWidth: 1.8, roughness: 1.3 }));
+  rc.path(`M${x+w-fold} ${y} L${x+w-fold} ${y+fold} L${x+w} ${y+fold}`,
+    { stroke: color.stroke, strokeWidth: 1.6, roughness: 1.2 });
+}
+
+// Bubble — speech bubble for Status / Notification (left or right tail)
+function bubble(x, y, w, h, color, tailSide = 'left') {
+  rc.rectangle(x, y, w, h, opts(color, { strokeWidth: 2, roughness: 1.3 }));
+  const tailY = y + h * 0.5;
+  if (tailSide === 'left') {
+    rc.path(`M${x} ${tailY-10} L${x-14} ${tailY} L${x} ${tailY+10}`,
+      { stroke: color.stroke, fill: color.fill, fillStyle: 'solid', strokeWidth: 2, roughness: 1.2 });
+  } else {
+    rc.path(`M${x+w} ${tailY-10} L${x+w+14} ${tailY} L${x+w} ${tailY+10}`,
+      { stroke: color.stroke, fill: color.fill, fillStyle: 'solid', strokeWidth: 2, roughness: 1.2 });
+  }
+}
+
+// Hexagon — used for Error / Decision / 异常兜底
+function hexagon(cx, cy, w, h, color) {
+  const dx = w / 2, dy = h / 2, ear = w * 0.18;
+  const pts = [
+    [cx - dx + ear, cy - dy],
+    [cx + dx - ear, cy - dy],
+    [cx + dx,       cy],
+    [cx + dx - ear, cy + dy],
+    [cx - dx + ear, cy + dy],
+    [cx - dx,       cy],
+  ];
+  rc.polygon(pts, opts(color));
+}
+
+// Timeline — horizontal dashed line with tick marks
+function timeline(x1, y, x2, marks /* [{x,text}] — text rendered separately via plain() */) {
+  rc.line(x1, y, x2, y, { stroke: C.flow, strokeWidth: 1.6, roughness: 1, strokeLineDash: [6, 8] });
+  marks.forEach(m => {
+    rc.line(m.x, y - 6, m.x, y + 6, { stroke: C.flow, strokeWidth: 1.6, roughness: 1 });
+  });
+}
+
+// ============================================================
+//  TEXT HELPERS — Title (Times + 中宋) + body (Times + 宋体)
+//  All Chinese text MUST go through HTML labels, not canvas fillText,
+//  so the serif fallback chain (Songti/SimSun/Noto Serif SC) kicks in.
+//  `text` / `sub` are injected as HTML (so <b>, <br> work). Escape literal
+//  '<' and '&' as &lt; / &amp;, and never pass untrusted strings.
+// ============================================================
+const L = document.getElementById('labels');
+
+// Two-line label: bold Times/Zhongsong title + regular Times/Songti subtitle
+function lbl({ text, sub, x, y, w, color, size=24, subSize=16, align='center' }) {
+  const div = document.createElement('div');
+  div.className = 'label';
+  div.style.left = x + 'px'; div.style.top = y + 'px';
+  div.style.width = w + 'px'; div.style.textAlign = align;
+  div.style.color = color;
+  div.innerHTML = `
+    <div class="ti" style="font-size:${size}px;font-weight:700">${text}</div>
+    ${sub ? `<div class="bd" style="font-size:${subSize}px;color:${color};opacity:.85;margin-top:3px">${sub}</div>` : ''}
+  `;
+  L.appendChild(div);
+}
+
+// Single-line plain label (arrow labels, bubble content, captions)
+function plain({ text, x, y, w, color='#3a3530', size=18, weight=400, bg=null, align='center' }) {
+  const div = document.createElement('div');
+  div.className = 'label bd';
+  div.style.left = x + 'px'; div.style.top = y + 'px';
+  div.style.width = w + 'px'; div.style.textAlign = align;
+  div.style.color = color; div.style.fontSize = size + 'px';
+  div.style.fontWeight = weight;
+  if (bg) { div.style.background = bg; div.style.padding = '1px 6px'; }
+  div.innerHTML = text;
+  L.appendChild(div);
+}
+
+// Canvas title (Times bold for Latin, Zhongsong for Chinese — fillText supports CJK fine)
+function title(text, x, y, size=44) {
+  ctx.font = `700 ${size}px ${FONT_TI}`;
+  ctx.fillStyle = C.title;
+  ctx.fillText(text, x, y);
+}
+function subtitle(text, x, y, size=22) {
+  ctx.font = `400 ${size}px ${FONT_BD}`;
+  ctx.fillStyle = C.subtitle;
+  ctx.fillText(text, x, y);
+}
+
+// Label background = canvas ivory, slightly translucent. Use for any label that sits on a line.
+const LABEL_BG = 'rgba(253,253,250,.94)';
+
+// ============================================================
+//  COMPOSITE HELPERS
+// ============================================================
+// Node — box + vertically centered two-line label in the box's stroke color.
+//   node(x, y, w, h, C.agent, '在线检索', 'Query 理解 · 召回', { box: { strokeWidth: 3 }, size: 30 })
+function node(x, y, w, h, color, text, sub, o = {}) {
+  const size = o.size || 23, subSize = o.subSize || 15;
+  box(x, y, w, h, color, o.box || {});
+  const textH = size * 1.22 + (sub ? 3 + subSize * 1.22 : 0);
+  lbl({ text, sub, x, y: y + (h - textH) / 2, w, color: color.stroke, size, subSize });
+}
+
+// Group Frame — dashed boundary around a group of nodes (subsystem / sandbox / plan).
+// Drawn as 4 dashed lines, never rc.rectangle (a rough rectangle can paint fill over the nodes inside).
+// The title sits on the top edge with LABEL_BG so the dashed line does not cross it.
+//   frame(340, 280, 1330, 210, C.agent, '在线检索')
+function frame(x, y, w, h, color, label, labelW = 160) {
+  const o = { stroke: color.stroke, strokeWidth: 1.6, roughness: 1.2, strokeLineDash: [10, 6] };
+  rc.line(x, y, x + w, y, o);
+  rc.line(x + w, y, x + w, y + h, o);
+  rc.line(x + w, y + h, x, y + h, o);
+  rc.line(x, y + h, x, y, o);
+  if (label) plain({ text: label, x: x + 18, y: y - 13, w: labelW, color: color.stroke,
+                     size: 17, weight: 700, bg: LABEL_BG, align: 'left' });
+}
+
+// Legend — color key. Required when a diagram uses more than 5 colors (SKILL.md rule 6); list only colors used.
+// Swatches are small solid boxes with the text beside them, never inside.
+//   legend(80, 1000, [{ c: C.user, n: 'User', z: '用户' }, { c: C.agent, n: '主 Agent', z: '编排核心' }], 3, 300)
+function legend(x, y, items, cols = 3, colW = 300) {
+  plain({ text: '图例 · Legend', x, y: y - 30, w: 200, color: C.title, size: 20, weight: 700, align: 'left' });
+  items.forEach((it, i) => {
+    const ix = x + (i % cols) * colW, iy = y + Math.floor(i / cols) * 62;
+    rc.rectangle(ix, iy, 36, 26, opts(it.c, { strokeWidth: 2, roughness: 1.3 }));
+    plain({ text: it.n, x: ix + 48, y: iy - 1, w: colW - 60, color: it.c.stroke, size: 19, weight: 700, align: 'left' });
+    if (it.z) plain({ text: it.z, x: ix + 48, y: iy + 24, w: colW - 60, color: C.caption, size: 15, align: 'left' });
+  });
+}
+
+// ============================================================
+//  MAIN — replace this with your own diagram
+// ============================================================
+function main() {
+  // Detail d3 · ③ Generation, 1920×1080.
+  // Concept color binding (see diagram-binding.md):
+  //   C.memory = Top-k 片段          C.user  = 用户
+  //   C.agent  = 提示词组装 (main subject) · 证据检查
+  //   C.llm    = 大模型               C.im    = 带引用的回答
+  //   C.error  = 拒答 (red dashed exception path)
+  //   C.flow   = all normal arrows
+  // 6 colors > 5 → legend() at the bottom.
+
+  // ---------- Bilingual helpers (pairs are always passed as (中文, English); English leads, larger) ----------
+  // Two-line label: English line, then a smaller Chinese line under it.
+  const bl = (zh, en, zhSize = 13) => `${en}<br><span style="font-size:${zhSize}px">${zh}</span>`;
+  // One-line label "English<em space>中文" — every frame() label uses it (build_deck.py splits on the em space).
+  const fl = (zh, en) => `${en}&emsp;<span style="font-size:14px">${zh}</span>`;
+  // Shrink the last label to its text width, so its ivory background only masks what it covers.
+  const fitLast = () => { L.lastChild.style.width = 'max-content'; };
+  // Block centered in (x, y, w, h): EN title / smaller CN title / detail pairs (EN over smaller CN; 'gap' = spacer).
+  // The CN title is the node's pairing name: keep it the first bold CJK line inside the box.
+  const btext = (x, y, w, h, color, [tz, te], subs = [], o = {}) => {
+    const size = o.size || 22, zhSize = o.zhSize || Math.round(size * 0.68);
+    const subSize = o.subSize || 15, zhSubSize = o.zhSubSize || 13, pairGap = o.pairGap || 4;
+    let html = `<div class="ti" style="font-size:${size}px">${te || tz}</div>`;
+    if (te) html += `<div class="ti" style="font-size:${zhSize}px;margin-top:1px">${tz}</div>`;
+    let pending = 0, first = true;
+    subs.forEach((s) => {
+      if (s === 'gap') { pending += 12; return; }
+      const [sz, se] = s, mt = (first ? 8 : pairGap) + pending;
+      first = false; pending = 0;
+      html += `<div style="margin-top:${mt}px;opacity:.88">` +
+              `<div style="font-size:${subSize}px">${se || sz}</div>` +
+              (se ? `<div style="font-size:${zhSubSize}px">${sz}</div>` : '') + `</div>`;
+    });
+    plain({ text: html, x, y, w, color: color.stroke, size: subSize });
+    L.lastChild.style.top = y + (h - L.lastChild.offsetHeight) / 2 + 'px';   // measured: a wrapped line stays centered
+  };
+  // Node = box + centered bilingual block. Main subject: bigger box + { box: { strokeWidth: 3.2 } }.
+  const bnode = (x, y, w, h, color, t, subs, o = {}) => {
+    box(x, y, w, h, color, o.box || {});
+    btext(x, y, w, h, color, t, subs, o);
+  };
+  const RED = { stroke: C.error.stroke, strokeLineDash: [10, 7] };
+  // Polyline with an arrowhead on the last segment (o = arrow options, e.g. RED)
+  const route = (pts, o = {}) => {
+    const lo = Object.assign({ stroke: C.flow, strokeWidth: 2 }, o);
+    for (let i = 0; i < pts.length - 2; i++) rc.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], lo);
+    const n = pts.length;
+    arrow(pts[n - 2][0], pts[n - 2][1], pts[n - 1][0], pts[n - 1][1], o);
+  };
+  // Stacked boxes = several instances of one concept (the deck treats the stack as one node)
+  const stack = (x, y, w, h, color) => {
+    box(x + 24, y - 20, w, h, color, { strokeWidth: 1.8 });
+    box(x + 12, y - 10, w, h, color, { strokeWidth: 2 });
+    box(x, y, w, h, color);
+  };
+  const BIG = { size: 26, zhSize: 18, subSize: 16, zhSubSize: 14, pairGap: 8 };
+  // One section of the prompt: a folded note with a bold heading and EN / 中文 line pairs
+  const section = (x, y, w, h, en, zh, lines) => {
+    taskCard(x, y, w, h, C.agent);
+    plain({ text: `<div class="ti" style="font-size:18px">${en}&emsp;<span style="font-size:15px">${zh}</span></div>` +
+                  lines.map(([le, lz]) => `<div style="margin-top:6px">${le}<br><span style="font-size:13px">${lz}</span></div>`).join(''),
+            x: x + 20, y: y + 14, w: w - 40, color: C.agent.stroke, size: 15, align: 'left' });
+  };
+
+  // ---------- Title: exactly two title() calls — English (starts with ③), then Chinese ----------
+  const head = '③ Answer only from evidence';
+  ctx.font = `700 40px ${FONT_TI}`;
+  const headW = ctx.measureText(head).width + 24;
+  title(head, 60, 66, 40);
+  title('只依据证据作答', 60 + headW, 66, 28);   // same text as the overview line under ③: it morphs, no cross-fade
+  subtitle('The prompt packs instructions, numbered evidence and the question; the LLM answers with citations, and says it does not know when the evidence is missing.', 60, 104, 21);
+  subtitle('提示词装入指令、带编号的证据和问题；大模型作答并标注引用，证据不足时直接说不知道', 60, 134, 18);
+
+  // ---------- Zone ----------
+  frame(40, 200, 1840, 690, C.llm, fl('回答生成 · 每次提问', 'Generation · on every question'), 10); fitLast();
+
+  // ---------- Inputs: the user's question and the top-k chunks from ② ----------
+  bnode(80, 280, 320, 200, C.user, ['用户', 'User'],
+        [['读到回答和引用', 'Reads the answer and citations'], ['点编号即可打开原文', 'Clicks a number to open the source']], BIG);
+  stack(80, 590, 316, 240, C.memory);
+  btext(80, 590, 316, 240, C.memory, ['Top-k 片段', 'Top-k chunks'],
+        [['[1] guide.pdf · p.4', null], ['[2] guide.pdf · p.5', null], ['[3] faq.html · Q7', null]], BIG);
+
+  // ---------- Prompt assembly: question + numbered evidence + instructions ----------
+  box(490, 280, 520, 590, C.agent, { strokeWidth: 3.2 });
+  btext(490, 290, 520, 70, C.agent, ['提示词组装', 'Prompt assembly'], [], { size: 28, zhSize: 19 });
+  section(520, 370, 460, 95, 'User question', '用户问题', [
+    ['"How long does a refund take?"', '「退款需要多久？」']]);
+  section(520, 485, 460, 170, 'Numbered evidence', '编号证据', [
+    ['[1] "…refunds are paid within 14 days…"', '[1]「……退款在 14 天内到账……」'],
+    ['[2] "…back to the original card…"', '[2]「……原路退回支付卡……」'],
+    ['[3] "…bank transfers can take longer…"', '[3]「……银行转账可能更久……」']]);
+  section(520, 675, 460, 170, 'System instructions', '系统指令', [
+    ['Answer only from the evidence above.', '只依据上方证据作答'],
+    ['Cite every claim as [n].', '每句结论用 [n] 标注来源'],
+    ['If it is not there, say you don\'t know.', '证据里没有，就说不知道']]);
+  arrow(402, 418, 518, 418);
+  arrow(398, 640, 518, 640);
+
+  // ---------- LLM → evidence check → answer with citations (flows upward, as on the overview), or refuse ----------
+  bnode(1110, 710, 340, 160, C.llm, ['大模型', 'LLM'],
+        [['按指令作答', 'Follows the instructions'], ['只用编号证据', 'Uses only the numbered evidence']], BIG);
+  arrow(1012, 790, 1108, 790);
+  bnode(1110, 500, 340, 130, C.agent, ['证据检查', 'Evidence check'],
+        [['每句都有对应证据吗？', 'Is every claim backed by a chunk?']], { size: 22, zhSize: 16, subSize: 15, zhSubSize: 13 });
+  arrow(1280, 708, 1280, 632);
+
+  hexagon(1690, 565, 290, 110, C.error);
+  plain({ text: 'Say "I don\'t know"', x: 1545, y: 538, w: 290, color: C.error.stroke, size: 19, weight: 700 });
+  plain({ text: '拒答 · 说「不知道」', x: 1545, y: 565, w: 290, color: C.error.stroke, size: 15, weight: 700 });
+  arrow(1452, 565, 1543, 565, RED);
+  plain({ text: bl('否', 'No'), x: 1458, y: 520, w: 80, color: C.error.stroke, size: 15 });
+  plain({ text: bl('不编造，宁可拒答', 'Never guess; refuse instead'), x: 1545, y: 630, w: 290, color: C.error.stroke, size: 15 });
+
+  bnode(1110, 280, 730, 130, C.im, ['带引用的回答', 'Answer with citations'],
+        [['「退款在 14 天内 [1] 原路退回支付卡 [2]。」', '"Refunds are paid within 14 days [1], back to the original card [2]."']],
+        { size: 24, zhSize: 17, subSize: 16, zhSubSize: 14 });
+  arrow(1280, 498, 1280, 412);
+  plain({ text: bl('是', 'Yes'), x: 1292, y: 436, w: 60, color: C.flow, size: 15, align: 'left' });
+  route([[1150, 278], [1150, 240], [240, 240], [240, 278]]);
+
+  legend(80, 965, [
+    { c: C.memory, n: 'Knowledge', z: '知识数据' }, { c: C.user, n: 'User', z: '用户' },
+    { c: C.agent, n: 'Orchestration', z: '检索编排' }, { c: C.llm, n: 'LLM', z: '大模型' },
+    { c: C.im, n: 'Answer', z: '回答' }, { c: C.error, n: 'Refusal', z: '拒答' },
+  ], 6, 290);
+}
+
+main();
+window.__renderDone = true;
+</script>
+</body>
+</html>

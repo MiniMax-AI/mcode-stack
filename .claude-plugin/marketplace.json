@@ -36,6 +36,16 @@
         "name": "MiniMax Code team"
       },
       "homepage": "https://github.com/MiniMax-AI/mcode-stack/tree/main/stacks/req-tpm"
+    },
+    {
+      "name": "youfang",
+      "source": "./stacks/youfang",
+      "description": "Turn architecture and flow diagrams into Keynote-style Magic Move slide decks: one offline HTML file where the boxes and titles two slides share morph and fly, in one of four visual styles (hand-drawn, minimal, dark neon, neo-brutalist) picked from rendered samples, with optional 4K video export.",
+      "category": "Productivity",
+      "author": {
+        "name": "Youfang (MiniMax Code team)"
+      },
+      "homepage": "https://github.com/MiniMax-AI/mcode-stack/tree/main/stacks/youfang"
     }
   ]
 }

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Deck Title · 演示标题</title>
+<style>
+  /* Theme variables are filled from the diagrams' exported style (see "Theme" in the script):
+     --paper = the diagrams' background, --ti / --bd = their font stacks,
+     --glass / --pane / --pane-shadow = the cover / closing cards' frosted glass (the style's C.card). */
+  :root { --paper: #fdfdfa;
+    --ti: 'Times New Roman', Times, 'STZhongsong', '华文中宋', 'Songti SC', 'SimSun', '宋体', 'Noto Serif SC', serif;
+    --bd: 'Times New Roman', Times, 'Songti SC', 'STSong', 'SimSun', '宋体', 'Noto Serif SC', serif;
+    --glass: linear-gradient(160deg, rgba(31,85,130,.22) 0%, rgba(120,160,195,.18) 38%, rgba(227,235,242,.40) 70%, rgba(253,253,250,.55) 100%);
+    --pane: rgba(253,253,250,.42); --pane-shadow: 0 26px 70px rgba(20,40,60,.14), 0 4px 14px rgba(20,40,60,.06); }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; cursor: default; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; background: var(--paper); }
+  .layer { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: none; }
+  .a { position: absolute; transform-origin: 0 0; box-sizing: border-box; margin: 0; }
+  .a svg { display: block; overflow: visible; }
+  img.a { display: block; }
+  .ti { font-family: var(--ti); font-weight: 700; }
+  .bd { font-family: var(--bd); font-weight: 400; }
+  /* a title flying across the diagram keeps a paper-coloured halo so crossed lines don't cut through it */
+  .gh { text-shadow: 0 0 2px var(--paper), 0 0 6px var(--paper), 0 0 12px var(--paper); }
+  /* cover / closing card: the overview sits under frosted glass, the card is a second, denser pane. */
+  #glass, #card { position: absolute; display: none; pointer-events: none; }
+  #glass { left: 0; top: 0; width: 1920px; height: 1080px; z-index: 2;
+    backdrop-filter: blur(9px) saturate(1.08); -webkit-backdrop-filter: blur(9px) saturate(1.08); background: var(--glass); }
+  #card { z-index: 3; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); background: var(--pane); box-shadow: var(--pane-shadow); }
+  #fly { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; }
+  #fly > div { position: absolute; left: 0; top: 0; transform-origin: 0 0; white-space: pre; margin: 0; padding: 0; }
+</style>
+<script src="assets/deck_data.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const DATA = window.DECK_DATA;
+const W = 1920, H = 1080;
+
+// ==================== CONFIG (edit this block only) ====================
+// Story: [cv] → ov → (zoom into region → detail diagram → spots) × N → ov → [end]
+// Every slide is one of the deck's diagrams seen through a camera: ov = the region of the overview
+// a section is about, spots = regions of its detail diagram (canvas px, [x, y, w, h]). Nothing is drawn on top.
+// cv / end = the opening / closing cards (optional), shown over the overview behind frosted glass.
+// Write one comment per spot: the single conclusion that slide makes.
+const SECTIONS = [
+  { d: 'd1', ov: [20, 240, 570, 890], spots: [
+    [580, 312, 775, 232],     // conclusion of spot 1
+    [650, 556, 640, 261],     // conclusion of spot 2
+    [1385, 205, 505, 825] ] },// conclusion of spot 3
+];
+// Zone keywords → zone id, tested in order against each frame's pairing label (its Chinese part first).
+// Same-named elements in different zones only pair when the name is unique on both slides.
+// Order matters: put the more specific keyword first (e.g. /公网接入/ before /^公网/).
+const ZONES = [
+  [/受信|Trusted/, 'T'],
+  [/隔离|沙箱|Sandbox|Isolated/, 'X'],
+];
+// ==================== /CONFIG ====================
+
+// ---------- Theme: follow the style template the diagrams were drawn with ----------
+// build_deck.py exports each diagram's paper colour, .ti / .bd fonts, C.glow and C.card (cards' glass).
+// C.glow is a CSS filter applied to every shape, '{c}' standing for that shape's stroke colour.
+const GLOW = (DATA.ov.theme || {}).glow || null;
+{
+  const th = DATA.ov.theme || {}, card = ((DATA.cv || DATA.end || {}).theme || {}).card || th.card || {};
+  const set = (k, v) => v && document.documentElement.style.setProperty(k, v);
+  set('--paper', th.bg); set('--ti', th.ti); set('--bd', th.bd);
+  set('--glass', card.glass); set('--pane', card.pane); set('--pane-shadow', card.shadow);
+}
+
+const SLIDES = DATA.cv ? [{ d: 'cv' }, { d: 'ov' }] : [{ d: 'ov' }];
+SECTIONS.forEach(s => {
+  SLIDES.push({ d: 'ov', focus: s.ov });
+  SLIDES.push({ d: s.d });
+  s.spots.forEach(r => SLIDES.push({ d: s.d, focus: r }));
+});
+SLIDES.push({ d: 'ov' });
+if (DATA.end) SLIDES.push({ d: 'end' });
+
+// ---------- Geometry ----------
+const DIM = 0.13, PAD = 28, MAX_ZOOM = 1.75;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const seg = (p, a, b) => clamp((p - a) / (b - a), 0, 1);
+const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const ctr = r => [r[0] + r[2] / 2, r[1] + r[3] / 2];
+const lerp = (a, b, e) => a + (b - a) * e;
+const lerpR = (a, b, e) => [lerp(a[0], b[0], e), lerp(a[1], b[1], e), lerp(a[2], b[2], e), lerp(a[3], b[3], e)];
+const toStage = (c, r) => [c.x + r[0] * c.s, c.y + r[1] * c.s, r[2] * c.s, r[3] * c.s];
+const toLayer = (c, r) => [(r[0] - c.x) / c.s, (r[1] - c.y) / c.s, r[2] / c.s, r[3] / c.s];
+
+SLIDES.forEach(sl => {
+  const D = DATA[sl.d], fit = Math.min(W / D.w, H / D.h);
+  if (!sl.focus) { sl.cam = { s: fit, x: (W - D.w * fit) / 2, y: (H - D.h * fit) / 2 }; return; }
+  const [x, y, w, h] = [sl.focus[0] - PAD, sl.focus[1] - PAD, sl.focus[2] + 2 * PAD, sl.focus[3] + 2 * PAD];
+  const ax = 70, ay = 50, aw = W - 2 * ax, ah = H - 2 * ay;
+  const s = Math.min(aw / w, ah / h, fit * MAX_ZOOM);
+  sl.cam = { s, x: ax + (aw - w * s) / 2 - x * s, y: ay + (ah - h * s) / 2 - y * s };
+});
+
+// ---------- Layers: one per diagram, every shape and text line is its own element ----------
+const stage = document.getElementById('stage');
+const LAYERS = {};
+function layer(key) {
+  if (LAYERS[key]) return LAYERS[key];
+  const D = DATA[key], el = document.createElement('div');
+  el.className = 'layer'; el.style.width = D.w + 'px'; el.style.height = D.h + 'px';
+  const atoms = [];
+  D.shapes.forEach((s, i) => {
+    const [x, y, w, h] = s.r, e = document.createElement('div');
+    e.className = 'a';
+    e.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px` +
+      (GLOW && s.c ? `;filter:${GLOW.replaceAll('{c}', s.c)}` : '');
+    e.innerHTML = `<svg width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}">${s.svg}</svg>`;
+    el.appendChild(e);
+    atoms.push(s.atom = { el: e, R: s.r, T: s.r, base: 1, uni: false, src: s });
+  });
+  (D.images || []).forEach(m => {
+    const [x, y, w, h] = m.r, e = document.createElement('img');
+    e.className = 'a'; e.src = m.src; e.alt = '';
+    e.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+    el.appendChild(e);
+    atoms.push(m.atom = { el: e, R: m.r, T: m.r, base: m.op, uni: false, src: m });
+  });
+  D.texts.forEach(t => {
+    const [x, y, w, h] = t.r, e = document.createElement('div');
+    e.className = 'a';
+    e.style.cssText = `${t.css};position:absolute;left:${x - .5}px;top:${y}px;width:${w + 1}px;height:${h}px`;
+    e.innerHTML = t.html;
+    el.appendChild(e);
+    atoms.push(t.atom = { el: e, R: [x - .5, y, w + 1, h], T: t.t, base: t.op, uni: true, src: t });
+  });
+  stage.appendChild(el);
+  return LAYERS[key] = { el, atoms, D };
+}
+
+// Opacity of an atom on a slide: everything outside the focus region is dimmed.
+function stateOp(sl, a) {
+  if (!sl.focus) return a.base;
+  const [fx, fy, fw, fh] = [sl.focus[0] - PAD, sl.focus[1] - PAD, sl.focus[2] + 2 * PAD, sl.focus[3] + 2 * PAD];
+  const r = a.T, [cx, cy] = ctr(r);
+  const ix = Math.max(0, Math.min(r[0] + r[2], fx + fw) - Math.max(r[0], fx));
+  const iy = Math.max(0, Math.min(r[1] + r[3], fy + fh) - Math.max(r[1], fy));
+  const inC = cx >= fx && cx <= fx + fw && cy >= fy && cy <= fy + fh;
+  const cover = (ix * iy) / Math.max(1, r[2] * r[3]);
+  return a.base * (inC && cover > .35 || cover > .6 ? 1 : DIM);
+}
+
+// Place an atom so that its anchor rect T lands on `cur` (layer coords). Text keeps its aspect;
+// al = 'l' / 'r' pins its left / right edge instead of its centre (labels sharing only a prefix / suffix).
+function place(a, cur, al) {
+  if (!cur) { a.el.style.transform = ''; return; }
+  const [ox, oy] = a.R, T = a.T;
+  let sx, sy, dx, dy;
+  if (a.uni) {
+    sx = sy = cur[3] / T[3];
+    const [cx, cy] = ctr(T), [nx, ny] = ctr(cur);
+    dx = al === 'l' ? cur[0] - ox - sx * (T[0] - ox) : al === 'r' ? cur[0] + cur[2] - ox - sx * (T[0] + T[2] - ox) : nx - ox - sx * (cx - ox);
+    dy = ny - oy - sy * (cy - oy);
+  } else {
+    sx = cur[2] / T[2]; sy = cur[3] / T[3];
+    dx = cur[0] - ox - sx * (T[0] - ox); dy = cur[1] - oy - sy * (T[1] - oy);
+  }
+  a.el.style.transform = `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
+}
+const setCam = (L, c) => { L.el.style.transform = `translate(${c.x}px,${c.y}px) scale(${c.s})`; };
+
+// ---------- Cover and closing card ----------
+// The overview waits behind frosted glass, slightly pushed in; its own title is hidden because the
+// card title is what becomes it. Leaving the cover, the title's shared words fly to the overview's
+// top-left heading first; then the frost wipes away outward from there, uncovering the rest.
+// The closing card plays the same move backwards: the heading flies into its title as the frost closes.
+const CARDS = new Set(['cv', 'end'].filter(k => DATA[k]));
+const COVER_ZOOM = 1.06, SOFT = 520;
+const OV = SLIDES.find(s => s.d === 'ov' && !s.focus);
+const slideOf = key => SLIDES.find(s => s.d === key);
+const rgb = css => (css.match(/(?:^|;)color:rgba?\(([^)]*)\)/) || [, '0,0,0'])[1].split(',').slice(0, 3).map(Number);
+const mix = (a, b, e) => `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], e))).join(',')})`;
+const zoomCam = (c, z) => ({ s: c.s * z, x: W / 2 - (W / 2 - c.x) * z, y: H / 2 - (H / 2 - c.y) * z });
+const lerpCam = (a, b, e) => ({ s: lerp(a.s, b.s, e), x: lerp(a.x, b.x, e), y: lerp(a.y, b.y, e) });
+const glass = document.createElement('div'), card = document.createElement('div');
+glass.id = 'glass'; card.id = 'card'; stage.append(glass, card);
+const titles = key => layer(key).atoms.filter(a => a.uni && a.src.grp === 'title');
+const cardAtom = key => layer(key).atoms.filter(a => !a.uni).reduce((m, a) => a.R[2] * a.R[3] > m.R[2] * m.R[3] ? a : m);
+function showCover(key, under) {
+  const U = layer('ov'), V = layer(key), hide = new Set(titles('ov'));
+  U.el.style.display = 'block'; U.el.style.zIndex = 1; setCam(U, under);
+  for (const a of U.atoms) { a.el.style.transform = ''; a.el.style.opacity = hide.has(a) ? 0 : a.base; }
+  V.el.style.zIndex = 4;
+  const r = toStage(slideOf(key).cam, cardAtom(key).R);    // the card frame's box, minus its stroke jitter
+  Object.assign(card.style, { display: 'block', left: r[0] + 8 + 'px', top: r[1] + 8 + 'px', width: r[2] - 16 + 'px', height: r[3] - 16 + 'px', opacity: 1 });
+  Object.assign(glass.style, { display: 'block', maskImage: '', webkitMaskImage: '' });
+}
+// Word boxes (latin words, single CJK characters) of a title atom, in its layer's coordinates.
+function words(a) {
+  const tn = a.el.firstChild, er = a.el.getBoundingClientRect(), k = er.width / a.el.offsetWidth, out = [];
+  for (const m of tn.textContent.matchAll(/[A-Za-z]+|\S/g)) {
+    const rg = document.createRange(); rg.setStart(tn, m.index); rg.setEnd(tn, m.index + m[0].length);
+    const b = rg.getBoundingClientRect();
+    out.push({ s: m[0], r: [a.R[0] + (b.left - er.left) / k, a.R[1] + (b.top - er.top) / k, b.width / k, b.height / k] });
+  }
+  return out;
+}
+function coverTrans(key) {
+  const U = layer('ov'), V = layer(key), cvCam = slideOf(key).cam, from = zoomCam(OV.cam, COVER_ZOOM);
+  V.el.style.display = 'block'; setCam(V, cvCam);
+  for (const a of V.atoms) { a.el.style.transform = ''; a.el.style.opacity = a.base; }
+  showCover(key, OV.cam);
+  // pair the card title's words with the overview heading's: zh line ↔ zh line, en line ↔ en line
+  // (matched by script, not by line order, so either side may put either language first);
+  // a paired word also turns from the card's title colour into the heading's ink on the way
+  const fly = document.createElement('div'); fly.id = 'fly'; stage.appendChild(fly);
+  const flights = [], TA = titles(key), TB = titles('ov'), cjk = a => /[\u4e00-\u9fff]/.test(a.src.txt);
+  const mk = (atom, w) => {
+    const d = document.createElement('div');
+    d.className = 'gh'; d.style.cssText = atom.src.css + `;line-height:${w.r[3]}px;background:none;padding:0`;
+    d.textContent = w.s; fly.appendChild(d); return d;
+  };
+  TA.forEach(ta => {
+    const tb = TB.find(b => cjk(b) === cjk(ta)), wb = tb ? words(tb) : [], used = new Set(), line = [];
+    for (const w of words(ta)) {
+      const j = wb.findIndex((v, k) => !used.has(k) && v.s === w.s);
+      if (j >= 0) used.add(j);
+      line.push({ el: mk(ta, w), h: w.r[3], a: toStage(cvCam, w.r), b: j >= 0 ? wb[j].r : null, j, win: [0, .18],
+                  ca: rgb(ta.src.css), cb: tb ? rgb(tb.src.css) : null });
+    }
+    // A word that overtakes another ("云端 Agent" → "Agent 云端") hops over it, away from the other title
+    // line, while the rest of its line holds still; a line with no overtaking arcs away instead.
+    const pairs = line.filter(f => f.b).map(f => f.j), order = [...pairs].sort((x, y) => x - y);
+    const side = TA.some(o => o.R[1] > ta.R[1]) ? -1 : 1;      // the upper line goes up, the lower one down
+    const hops = pairs.some((j, i) => order[i] !== j);
+    for (const f of line) if (f.b) { f.over = order.indexOf(f.j) < pairs.indexOf(f.j); f.side = side; f.arc = hops ? 0 : side; }
+    flights.push(...line);
+    wb.forEach((v, k) => { if (!used.has(k)) flights.push({ el: mk(tb, v), h: v.r[3], a: null, b: v.r, win: [.42, .7] }); });
+  });
+  for (const a of TA) a.el.style.opacity = 0;
+  const rest = V.atoms.filter(a => !TA.includes(a));
+  const o = TB.length ? words(TB[0])[0].r : [0, 0, 0, 0], diag = Math.hypot(W, H);
+  return {
+    dur: 2200,
+    apply(p) {
+      const e = ease(p), cam = lerpCam(from, OV.cam, e);
+      setCam(U, cam);
+      const fade = ease(seg(p, 0, .14));          // gone before a hopping word can reach the card's underline
+      for (const a of rest) a.el.style.opacity = a.base * (1 - fade);
+      card.style.opacity = 1 - fade;
+      const [ox, oy] = toStage(cam, o), R = lerp(-SOFT, diag + SOFT, ease(seg(p, .42, 1)));
+      const m = `radial-gradient(circle at ${ox}px ${oy}px, transparent ${Math.max(0, R)}px, #000 ${R + SOFT}px)`;
+      glass.style.maskImage = glass.style.webkitMaskImage = m;
+      // Two beats: an overtaking word ("云端 Agent" → "Agent 云端") hops off its line first; only then does
+      // the line glide, so nothing it passes can reach it. It crosses while off and lands once it is clear.
+      // Amplitudes use take-off size so gaps hold as words shrink; the two lines bow apart as they cross.
+      const q = ease(seg(p, .1, .58));
+      for (const f of flights) {
+        const over = f.a && f.b && f.over, tb = f.b && toStage(cam, f.b);
+        const k = over ? ease(seg(p, .02, .58)) : q, r = !f.a ? tb : !f.b ? f.a : lerpR(f.a, tb, k);
+        if (f.a && f.b) f.el.style.color = mix(f.ca, f.cb, k);
+        let dy = 0;
+        if (over) {
+          r[0] = lerp(f.a[0], tb[0], ease(seg(p, .08, .46)));
+          r[1] = lerp(f.a[1], tb[1], q);             // rides with its line, so the hop is a pure offset
+          dy = f.side * f.a[3] * ease(seg(p, .02, .16)) * (1 - ease(seg(p, .44, .58)));
+        } else if (f.a && f.b) dy = f.arc * f.a[3] * Math.sin(Math.PI * q);
+        f.el.style.transform = `translate(${r[0]}px,${Math.max(14, r[1] + dy)}px) scale(${r[3] / f.h})`;
+        f.el.style.opacity = f.a && f.b ? 1 : f.a ? 1 - ease(seg(p, f.win[0], f.win[1])) : ease(seg(p, f.win[0], f.win[1]));
+      }
+    },
+    done() { fly.remove(); },
+  };
+}
+
+// ---------- Static state ----------
+let cur = 0, tr = null;
+function setState(i) {
+  const sl = SLIDES[i], L = layer(sl.d);
+  for (const k in LAYERS) if (LAYERS[k] !== L) LAYERS[k].el.style.display = 'none';
+  L.el.style.display = 'block'; L.el.style.willChange = ''; L.el.style.zIndex = 1;
+  setCam(L, sl.cam);
+  for (const a of L.atoms) { a.el.style.transform = ''; a.el.style.opacity = stateOp(sl, a); a.el.style.willChange = ''; a.el.style.zIndex = ''; }
+  glass.style.display = card.style.display = 'none';
+  if (CARDS.has(sl.d)) showCover(sl.d, zoomCam(OV.cam, COVER_ZOOM));
+}
+
+// ---------- Same diagram: camera move + focus change ----------
+function cameraTrans(A, B) {
+  const L = layer(A.d), ca = A.cam, cb = B.cam;
+  const va = [-ca.x / ca.s, -ca.y / ca.s, W / ca.s, H / ca.s], vb = [-cb.x / cb.s, -cb.y / cb.s, W / cb.s, H / cb.s];
+  const ops = L.atoms.map(a => [a, stateOp(A, a), stateOp(B, a)]).filter(([, x, y]) => x !== y);
+  L.el.style.willChange = 'transform';
+  return {
+    dur: 1050,
+    apply(p) {
+      const e = ease(p), v = lerpR(va, vb, e), s = W / v[2];
+      setCam(L, { s, x: -v[0] * s, y: -v[1] * s });
+      const f = ease(seg(p, .1, .9));
+      for (const [a, x, y] of ops) a.el.style.opacity = lerp(x, y, f);
+    },
+  };
+}
+
+// ---------- Different diagrams: Magic Move ----------
+// Node titles: "向量库 · 按租户分片 · 如 HNSW" → "向量库". Frame labels: "公网接入区 · … Public access ①" → "公网接入区".
+const keyCore = k => { const c = k.replace(/ (·|\().*$/, ''); return /^\d+$/.test(c) ? k : c; };
+// A bilingual frame key ("公网接入区 Public access ①") drops its English tail; a monolingual one
+// ("Worker pool ②") only drops a trailing principle number.
+const frameCore = k => { const c = k.split(' · ')[0]; return /[\u4e00-\u9fff]/.test(c) ? c.replace(/\s+[A-Za-z]{2,}.*$/, '') : c.replace(/\s*[①-⑳]+$/, ''); };
+function keyCost(a, b) {
+  if (a === b) return 0;
+  const x = keyCore(a), y = keyCore(b);
+  if (x === y) return 1;
+  if (Math.min(x.length, y.length) >= 2 && (x.endsWith(y) || y.endsWith(x))) return 2;
+  return -1;
+}
+// Coarse zone of a point = the smallest labelled frame around it. Two same-named elements in different
+// zones are only paired when the name is unique on both slides (the gateway drawn in another zone is
+// still the gateway; the worker inside the trusted zone is not the one inside a sandbox).
+const ZONE = k => (ZONES.find(([re]) => re.test(k)) || [])[1] || null;
+function zones(D) {
+  if (D.zoneAt) return D;
+  const fr = D.shapes.filter(s => s.fkey && ZONE(s.fkey)).sort((a, b) => a.r[2] * a.r[3] - b.r[2] * b.r[3]);
+  D.zoneAt = r => {
+    const [x, y] = ctr(r), f = fr.find(({ r: q }) => x >= q[0] && x <= q[0] + q[2] && y >= q[1] && y <= q[1] + q[3]);
+    return f ? ZONE(f.fkey) : null;
+  };
+  D.count = {};
+  const inc = k => { D.count[k] = (D.count[k] || 0) + 1; };
+  D.nodes.forEach(n => n.key && inc('n:' + keyCore(n.key)));
+  D.texts.forEach(t => inc('t:' + t.txt));
+  return D;
+}
+function greedy(cands) {
+  cands.sort((p, q) => p[0] - q[0]);
+  const ua = new Set(), ub = new Set(), out = [];
+  for (const [, i, j] of cands) { if (ua.has(i) || ub.has(j)) continue; ua.add(i); ub.add(j); out.push([i, j]); }
+  return out;
+}
+// Returns pairs [atomA, atomB, kind] (kind: 'shape' | 'text' same line | 'left' / 'right' labels sharing
+// a prefix / suffix) and followers [atom, leadAtom, side, window] that ride along with a paired atom and fade.
+const stepless = s => s.replace(/^\d+ · /, '');        // "1 · 识别沙箱身份" ≈ "识别沙箱身份"
+function match(A, B) {
+  const DA = zones(DATA[A.d]), DB = zones(DATA[B.d]);
+  const dist = (ra, rb) => { const p = ctr(toStage(A.cam, ra)), q = ctr(toStage(B.cam, rb)); return Math.hypot(p[0] - q[0], p[1] - q[1]); };
+  const pairs = [], follow = [], usedA = new Set(), usedB = new Set(), pA = new Set(), pB = new Set();
+  const doneA = new Set(), doneB = new Set();          // nodes already handled as a whole
+  const kindOf = (a, b) => !a.uni ? 'shape' : a.src.txt === b.src.txt ? 'text' : stepless(a.src.txt) === stepless(b.src.txt) ? 'right' : 'left';
+  const pair = (a, b, kind, tw) => { pairs.push([a, b, kind || kindOf(a, b), tw]); usedA.add(a); usedB.add(b); pA.add(a); pB.add(b); };
+  const fol = (atom, lead, side, win) => { follow.push([atom, lead, side, win]); (side === 'a' ? usedA : usedB).add(atom); };
+  const amb = k => (DA.count[k] || 0) > 1 || (DB.count[k] || 0) > 1;
+  const clash = (za, zb, ambiguous) => za && zb && za !== zb && ambiguous;
+  const outer = (D, n) => D.shapes[n.shapes.at(-1)];
+  const label = (D, s) => s.ftext !== undefined ? D.texts[s.ftext].atom : null;
+  const textOK = (i, j) => {
+    const x = DA.texts[i], y = DB.texts[j];
+    return stepless(x.txt) === stepless(y.txt) && !clash(DA.zoneAt(x.t), DB.zoneAt(y.t), amb('t:' + x.txt));
+  };
+  const textPairs = (ia, ib) => greedy(ia.flatMap(i => ib.filter(j => textOK(i, j)).map(j => [dist(DA.texts[i].t, DB.texts[j].t), i, j])));
+
+  // 1. nodes with the same title: box (and stacked copies) + text lines. Top-level boxes pair first;
+  //    a nested box then prefers the copy that sits inside its own parent's partner.
+  const parent = D => D.parentOf || (D.parentOf = D.nodes.map(n => {
+    const r = outer(D, n).r, [cx, cy] = ctr(r);
+    let best = -1, ba = Infinity;
+    D.nodes.forEach((m, k) => {
+      const q = outer(D, m).r, a = q[2] * q[3];
+      if (m !== n && a > r[2] * r[3] && a < ba && cx >= q[0] && cx <= q[0] + q[2] && cy >= q[1] && cy <= q[1] + q[3]) { best = k; ba = a; }
+    });
+    return best;
+  }));
+  const PA = parent(DA), PB = parent(DB);
+  const nc = [];
+  DA.nodes.forEach((na, i) => na.key && DB.nodes.forEach((nb, j) => {
+    const k = nb.key ? keyCost(na.key, nb.key) : -1;
+    if (k < 0) return;
+    const ra = outer(DA, na).r, rb = outer(DB, nb).r;
+    if (clash(DA.zoneAt(ra), DB.zoneAt(rb), k === 2 || amb('n:' + keyCore(na.key)) || amb('n:' + keyCore(nb.key)))) return;
+    nc.push([k * 1e5 + dist(ra, rb), i, j]);
+  }));
+  const top = greedy(nc.filter(([, i, j]) => PA[i] < 0 && PB[j] < 0));
+  const takenA = new Set(top.map(q => q[0])), takenB = new Set(top.map(q => q[1]));
+  const sameParent = (i, j) => PA[i] >= 0 && top.some(([x, y]) => x === PA[i] && y === PB[j]);
+  const nodePairs = [...top, ...greedy(nc.filter(([, i, j]) => !takenA.has(i) && !takenB.has(j))
+    .map(([c, i, j]) => [c + (sameParent(i, j) ? 0 : 5e4), i, j]))];
+  const extras = [];                                   // stacked copies left over, settled after 1b
+  for (const [i, j] of nodePairs) {
+    const na = DA.nodes[i], nb = DB.nodes[j];
+    doneA.add(i); doneB.add(j);
+    const sa = [...na.shapes].reverse(), sb = [...nb.shapes].reverse(), n = Math.min(sa.length, sb.length);
+    for (let k = 0; k < n; k++) pair(DA.shapes[sa[k]].atom, DB.shapes[sb[k]].atom);
+    const fa = DA.shapes[sa[0]].atom, fb = DB.shapes[sb[0]].atom;
+    sa.slice(n).forEach(k => extras.push([DA.shapes[k].atom, fa, 'a']));
+    sb.slice(n).forEach(k => extras.push([DB.shapes[k].atom, fb, 'b']));
+    const tp = textPairs(na.texts, nb.texts);
+    tp.forEach(([x, y]) => pair(DA.texts[x].atom, DB.texts[y].atom));
+    na.texts.filter(x => !tp.some(p => p[0] === x)).forEach(x => fol(DA.texts[x].atom, fa, 'a', [0, .3]));
+    nb.texts.filter(y => !tp.some(p => p[1] === y)).forEach(y => fol(DB.texts[y].atom, fb, 'b', [.58, 1]));
+  }
+
+  // 1b. one concept drawn once (or as a stack) here and several times there: the extra copies split
+  //     off it — a spare stacked copy becomes one of them, otherwise they peel off the box itself.
+  //     The reverse direction merges them back. Nested boxes are left to step 5 (they ride their parent).
+  const clones = [];                                   // [source, atom, side]: atom emerges from / merges into source
+  const split = (DS, doneS, sideS) => DS.nodes.forEach((ns, s) => {
+    if (doneS.has(s) || !ns.key || parent(DS)[s] >= 0) return;
+    let best = null;
+    for (const [i, j] of nodePairs) {
+      const [mine, other, DO] = sideS === 'b' ? [DB.nodes[j], DA.nodes[i], DA] : [DA.nodes[i], DB.nodes[j], DB];
+      if (keyCore(mine.key) !== keyCore(ns.key)) continue;
+      const ro = outer(DO, other).r, rs = outer(DS, ns).r;
+      if (clash(sideS === 'b' ? DA.zoneAt(ro) : DB.zoneAt(rs), sideS === 'b' ? DB.zoneAt(rs) : DA.zoneAt(ro), true)) continue;
+      const d = sideS === 'b' ? dist(ro, rs) : dist(rs, ro);
+      if (!best || d < best.d) best = { d, other, DO };
+    }
+    if (!best) return;
+    doneS.add(s);
+    const box = outer(DS, ns).atom, src = outer(best.DO, best.other).atom, otherSide = sideS === 'b' ? 'a' : 'b';
+    const spare = extras.findIndex(([x, lead, side]) => side === otherSide && lead === src);
+    if (spare >= 0) { const copy = extras.splice(spare, 1)[0][0]; sideS === 'b' ? pair(copy, box) : pair(box, copy); }
+    else { clones.push([src, box, sideS]); (sideS === 'b' ? usedB : usedA).add(box); (sideS === 'b' ? pB : pA).add(box); }
+    const win = sideS === 'b' ? [.4, .9] : [.05, .45];
+    ns.shapes.slice(0, -1).forEach(k => fol(DS.shapes[k].atom, box, sideS, win));
+    ns.texts.forEach(k => fol(DS.texts[k].atom, box, sideS, win));
+  });
+  split(DB, doneB, 'b'); split(DA, doneA, 'a');
+  extras.forEach(([atom, lead, side]) => fol(atom, lead, side, side === 'a' ? [0, .3] : [.58, 1]));
+
+  // 2. zone frames with the same core label; their labels travel with them
+  const fc = [];
+  DA.shapes.forEach((s, i) => s.fkey && DB.shapes.forEach((t, j) => {
+    const k = !t.fkey ? -1 : s.fkey === t.fkey ? 0 : frameCore(s.fkey) === frameCore(t.fkey) ? 1 : -1;
+    if (k >= 0) fc.push([k * 1e5 + dist(s.r, t.r), i, j]);
+  }));
+  greedy(fc).forEach(([i, j]) => {
+    const s = DA.shapes[i], t = DB.shapes[j], la = label(DA, s), lb = label(DB, t);
+    pair(s.atom, t.atom);
+    if (la && lb && !usedA.has(la) && !usedB.has(lb)) pair(la, lb);
+  });
+
+  // 2b. a box on one slide that is a zone frame on the other (e.g. 出口代理 → the egress-proxy zone)
+  const boxToFrame = (n, f, nodeIsA) => {
+    const DN = nodeIsA ? DA : DB, DF = nodeIsA ? DB : DA, side = nodeIsA ? 'a' : 'b', win = nodeIsA ? [0, .3] : [.58, 1];
+    const P = (x, y, kind) => nodeIsA ? pair(x, y, kind) : pair(y, x, kind);
+    const usedF = nodeIsA ? usedB : usedA, d = (rn, rf) => nodeIsA ? dist(rn, rf) : dist(rf, rn);
+    const box = outer(DN, n).atom, title = n.texts.length ? DN.texts[n.texts[0]].atom : null, lb = label(DF, f);
+    const withLabel = title && lb && !usedF.has(lb);
+    P(box, f.atom, 'shape');
+    if (withLabel) P(title, lb, 'left');
+    // the box's own lines land on the same lines inside the zone (whose boxes then grow around them)
+    const [fx, fy, fw, fh] = f.r, rest = n.texts.slice(withLabel ? 1 : 0);
+    const inner = DF.texts.map((t, k) => k).filter(k => {
+      const t = DF.texts[k], [cx, cy] = ctr(t.t);
+      return !usedF.has(t.atom) && cx >= fx && cx <= fx + fw && cy >= fy && cy <= fy + fh;
+    });
+    const tp = greedy(rest.flatMap(i => inner.filter(k => stepless(DN.texts[i].txt) === stepless(DF.texts[k].txt))
+      .map(k => [d(DN.texts[i].t, DF.texts[k].t), i, k])));
+    tp.forEach(([i, k]) => P(DN.texts[i].atom, DF.texts[k].atom));
+    n.shapes.slice(0, -1).forEach(k => fol(DN.shapes[k].atom, box, side, win));
+    rest.filter(i => !tp.some(q => q[0] === i)).forEach(k => fol(DN.texts[k].atom, box, side, win));
+  };
+  const named = (n, s) => n.key && s.fkey && frameCore(s.fkey) === keyCore(n.key);
+  const c1 = [], c2 = [];
+  DA.nodes.forEach((n, i) => !doneA.has(i) && DB.shapes.forEach((s, j) => !usedB.has(s.atom) && named(n, s) && c1.push([dist(outer(DA, n).r, s.r), i, j])));
+  greedy(c1).forEach(([i, j]) => { doneA.add(i); boxToFrame(DA.nodes[i], DB.shapes[j], true); });
+  DB.nodes.forEach((n, j) => !doneB.has(j) && DA.shapes.forEach((s, i) => !usedA.has(s.atom) && named(n, s) && c2.push([dist(s.r, outer(DB, n).r), i, j])));
+  greedy(c2).forEach(([i, j]) => { doneB.add(j); boxToFrame(DB.nodes[j], DA.shapes[i], false); });
+
+  // 2c. the detail title is the overview's principle heading enlarged ("① Single public entry / 唯一公网入口"
+  //     → "① Single public entry / 入口收敛"). A title naming two principles takes both headings: the first
+  //     lands on its start, the second merges into its end (and splits back out on the way to the overview).
+  //     The second line travels from under the heading to beside the title, so it lands early (leaves late):
+  //     on a shared clock the growing first line would run into it mid-flight.
+  const glow = [];
+  const ovA = A.d === 'ov', DO = ovA ? DA : B.d === 'ov' ? DB : null, DT = ovA ? DB : DA;
+  const ti = DT.texts.filter(t => t.grp === 'title');
+  if (DO && (ti.length === 1 || ti.length === 2)) {       // one title line (monolingual) or two (bilingual)
+    const usedO = ovA ? usedA : usedB, sideO = ovA ? 'a' : 'b';
+    (ti[0].txt.match(/[①-⑳]/g) || []).forEach((n, k) => {
+      const head = DO.texts.filter(t => t.txt.startsWith(n) && !usedO.has(t.atom)).sort((x, y) => y.t[3] - x.t[3])[0];
+      if (!head) return;
+      const sub = DO.texts.find(t => Math.abs(t.t[0] - head.t[0]) < 3 && t.t[1] > head.t[1] && t.t[1] < head.t[1] + 2 * head.t[3]);
+      [[head, ti[0]], [sub, ti[1]]].forEach(([o, t]) => {
+        if (!o || !t) return;
+        glow.push(o.atom, t.atom);
+        const kind = o.txt === t.txt ? 'text' : 'left', tw = t === ti[1] ? (ovA ? [0, .6] : [.4, 1]) : undefined;
+        if (k === 0) ovA ? pair(o.atom, t.atom, kind, tw) : pair(t.atom, o.atom, kind, tw);
+        else { clones.push([t.atom, o.atom, sideO, 'r']); usedO.add(o.atom); }
+      });
+    });
+    // the subtitle belongs to the title: it settles under it once the title has arrived (or leaves first)
+    if ((ovA ? pB : pA).has(ti[0].atom))
+      DT.texts.filter(t => t.grp === 'subtitle').forEach(t => fol(t.atom, ti[0].atom, ovA ? 'b' : 'a', ovA ? [.55, 1] : [0, .35]));
+  }
+
+  // 3. any remaining identical text line (legend only pairs with legend; the titles were handled in 2c)
+  const free = (D, used) => D.texts.map((t, i) => i).filter(i => !used.has(D.texts[i].atom) && D.texts[i].grp !== 'title' && D.texts[i].grp !== 'subtitle');
+  const ia = free(DA, usedA), ib = free(DB, usedB);
+  greedy(ia.flatMap(i => ib.filter(j => textOK(i, j) && (DA.texts[i].grp === 'legend') === (DB.texts[j].grp === 'legend'))
+    .map(j => [dist(DA.texts[i].t, DB.texts[j].t), i, j]))).forEach(([i, j]) => pair(DA.texts[i].atom, DB.texts[j].atom));
+
+  // 4. a node that only shares a text line: its box and other lines grow / shrink around that line
+  const ride = (D, used, done, P, side, win) => D.nodes.forEach((n, i) => {
+    if (done.has(i)) return;
+    const lead = n.texts.map(k => D.texts[k].atom).find(a => P.has(a));
+    if (!lead) return;
+    n.shapes.forEach(k => { const a = D.shapes[k].atom; if (!used.has(a)) fol(a, lead, side, win); });
+    n.texts.forEach(k => { const a = D.texts[k].atom; if (!used.has(a)) fol(a, lead, side, win); });
+  });
+  ride(DA, usedA, doneA, pA, 'a', [.15, .6]);
+  ride(DB, usedB, doneB, pB, 'b', [.35, .85]);
+
+  // 5. details only one side shows: they grow out of (or shrink into) the smallest moving box or zone
+  //    around them; with no such box, they ride the region both slides describe (zoom in / out).
+  const settle = (D, P, used, side, win, winR) => {
+    const boxes = D.shapes.map(s => s.atom).filter(a => P.has(a));
+    for (const a of [...D.shapes, ...D.texts].map(s => s.atom)) {
+      if (used.has(a) || a.src.grp === 'title' || a.src.grp === 'subtitle') continue;
+      const [cx, cy] = ctr(a.T), area = a.T[2] * a.T[3];
+      let best = null;
+      for (const b of boxes) {
+        const q = b.T;
+        if (b !== a && q[2] * q[3] > area * 1.2 && cx >= q[0] && cx <= q[0] + q[2] && cy >= q[1] && cy <= q[1] + q[3]
+            && (!best || q[2] * q[3] < best.T[2] * best.T[3])) best = b;
+      }
+      fol(a, best || 'region', side, best ? win : winR);
+    }
+  };
+  settle(DA, pA, usedA, 'a', [.05, .5], [0, .45]);
+  settle(DB, pB, usedB, 'b', [.35, .9], [.4, 1]);
+  return { pairs, follow, clones, glow };
+}
+
+function magicTrans(A, B) {
+  const LA = layer(A.d), LB = layer(B.d);
+  setCam(LA, A.cam); setCam(LB, B.cam);
+  LA.el.style.display = LB.el.style.display = 'block';
+  LA.el.style.zIndex = 1; LB.el.style.zIndex = 2;
+  const { pairs, follow, clones, glow } = match(A, B);
+  const moved = new Set(), tracks = [], leads = new Map();
+  const track = (a, b, kind, camA, camB, oA, oB, top, tw) => {
+    const al = kind === 'left' ? 'l' : kind === 'right' ? 'r' : null;
+    const ta = { atom: a, from: a.T, to: toLayer(camA, toStage(camB, b.T)), al, tw };
+    const tb = { atom: b, from: toLayer(camB, toStage(camA, a.T)), to: b.T, al, tw };
+    // identical text: the top copy takes over early and the pair keeps a constant combined opacity;
+    // boxes and differing labels: a plain cross-fade while they overlap mid-flight.
+    const win = kind === 'text' ? (top === 'a' ? [.3, .75] : [.05, .45]) : al ? [.3, .7] : kind === 'restyle' ? [.35, .8] : [.2, .65];
+    tracks.push({ ta, tb, kind, oA, oB, win, top });
+    leads.set(a, ta); leads.set(b, tb); moved.add(a); moved.add(b);
+  };
+  for (const [a, b, kind, tw] of pairs) track(a, b, kind, A.cam, B.cam, stateOp(A, a), stateOp(B, b), 'b', tw);
+  // extra copies of a concept peel off (or merge into) the one box they share
+  const solo = clones.map(([src, atom, side, al]) => {
+    const t = side === 'b'
+      ? { atom, al, from: toLayer(B.cam, toStage(A.cam, src.T)), to: atom.T, o0: 0, o1: stateOp(B, atom), win: [.15, .6] }
+      : { atom, al, from: atom.T, to: toLayer(A.cam, toStage(B.cam, src.T)), o0: stateOp(A, atom), o1: 0, win: [.3, .75] };
+    leads.set(atom, t); moved.add(atom);
+    return t;
+  });
+  // the region both slides describe: an overview section ↔ the whole detail canvas
+  const reg = (sl, other) => sl.d !== 'ov' ? [0, 0, DATA[sl.d].w, DATA[sl.d].h]
+    : (SECTIONS.find(s => s.d === other.d) || { ov: [0, 0, DATA.ov.w, DATA.ov.h] }).ov;
+  const RA = reg(A, B), RB = reg(B, A);
+  const region = {
+    a: { from: RA, to: toLayer(A.cam, toStage(B.cam, RB)), atom: { T: RA } },
+    b: { from: toLayer(B.cam, toStage(A.cam, RA)), to: RB, atom: { T: RB } },
+  };
+  const followers = follow.map(([f, lead, side, win]) => {
+    moved.add(f);
+    return { atom: f, lead: lead === 'region' ? region[side] : leads.get(lead), side, win, o: side === 'a' ? stateOp(A, f) : stateOp(B, f) };
+  });
+  const still = [
+    ...LA.atoms.filter(a => !moved.has(a)).map(a => ({ atom: a, o0: stateOp(A, a), o1: 0, win: [0, .4] })),
+    ...LB.atoms.filter(a => !moved.has(a)).map(a => ({ atom: a, o0: 0, o1: stateOp(B, a), win: [.52, 1] })),
+  ];
+  // while things fly past each other, smaller boxes stay on top of bigger ones and text on top of boxes
+  for (const L of [LA, LB]) {
+    L.atoms.filter(a => !a.uni).sort((p, q) => q.T[2] * q.T[3] - p.T[2] * p.T[3]).forEach((a, i) => { a.el.style.zIndex = i + 1; });
+    L.atoms.filter(a => a.uni).forEach(a => { a.el.style.zIndex = 9999; });
+  }
+  for (const a of moved) a.el.style.willChange = 'transform, opacity';
+  for (const a of glow) a.el.classList.add('gh');
+  for (const a of LB.atoms) a.el.style.opacity = 0;
+  return {
+    dur: 1350,
+    apply(p) {
+      const e = ease(p), lvl = ease(seg(p, .1, .9));
+      const at = t => lerpR(t.from, t.to, t.tw ? ease(seg(p, t.tw[0], t.tw[1])) : e);
+      for (const k of tracks) {
+        place(k.ta.atom, at(k.ta), k.ta.al);
+        place(k.tb.atom, at(k.tb), k.tb.al);
+        const L = lerp(k.oA, k.oB, lvl), x = ease(seg(p, k.win[0], k.win[1]));
+        let oa = L * (1 - x), ob = L * x;
+        if (k.kind === 'text') {                       // over-the-top compositing: top + bottom·(1−top) = L
+          if (k.top === 'b') oa = ob >= .999 ? 0 : (L - ob) / (1 - ob);
+          else ob = oa >= .999 ? 0 : (L - oa) / (1 - oa);
+        }
+        k.ta.atom.el.style.opacity = oa; k.tb.atom.el.style.opacity = ob;
+      }
+      for (const t of solo) {
+        place(t.atom, at(t), t.al);
+        t.atom.el.style.opacity = lerp(t.o0, t.o1, ease(seg(p, t.win[0], t.win[1])));
+      }
+      for (const f of followers) {
+        const L = f.lead, c = at(L), T = L.atom.T;
+        const sx = c[2] / T[2], sy = c[3] / T[3], s = Math.sqrt(sx * sy);
+        const [fx, fy] = ctr(f.atom.T), nx = c[0] + (fx - T[0]) * sx, ny = c[1] + (fy - T[1]) * sy;
+        const w = f.atom.T[2] * s, h = f.atom.T[3] * s;
+        place(f.atom, [nx - w / 2, ny - h / 2, w, h]);
+        const q = ease(seg(p, f.win[0], f.win[1]));
+        f.atom.el.style.opacity = f.o * (f.side === 'a' ? 1 - q : q);
+      }
+      for (const s of still) s.atom.el.style.opacity = lerp(s.o0, s.o1, ease(seg(p, s.win[0], s.win[1])));
+    },
+    done() { for (const a of glow) a.el.classList.remove('gh'); },
+  };
+}
+
+// ---------- Driver ----------
+function makeTrans(i, j) {
+  const A = SLIDES[i], B = SLIDES[j];
+  const ck = CARDS.has(A.d) ? A.d : CARDS.has(B.d) ? B.d : null;
+  if (ck) {                                               // a card runs card → overview; played backwards to reach it
+    const t = coverTrans(ck), back = B.d === ck;
+    return { dur: t.dur, apply: p => t.apply(back ? 1 - p : p), done() { t.done(); setState(j); } };
+  }
+  const t = A.d === B.d ? cameraTrans(A, B) : magicTrans(A, B);
+  return { dur: t.dur, apply: t.apply, done() { if (t.done) t.done(); setState(j); } };
+}
+function finish() { if (!tr) return; tr.apply(1); tr.done(); tr = null; }
+function go(j) {
+  j = clamp(j, 0, SLIDES.length - 1);
+  if (tr) finish();
+  if (j === cur) return;
+  const i = cur; cur = j;
+  history.replaceState(null, '', '#' + (j + 1));
+  const t = tr = makeTrans(i, j);
+  const t0 = performance.now();
+  const tick = now => {
+    if (tr !== t) return;
+    const p = Math.min(1, (now - t0) / t.dur);
+    t.apply(p);
+    if (p < 1) requestAnimationFrame(tick); else finish();
+  };
+  requestAnimationFrame(tick);
+}
+
+function fitStage() {
+  const s = Math.min(innerWidth / W, innerHeight / H);
+  stage.style.transform = `translate(${(innerWidth - W * s) / 2}px,${(innerHeight - H * s) / 2}px) scale(${s})`;
+}
+addEventListener('resize', fitStage);
+addEventListener('keydown', e => {
+  if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+  else if (e.key === 'Home') go(0);
+  else if (e.key === 'End') go(SLIDES.length - 1);
+  else if (e.key === 'f' || e.key === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+});
+addEventListener('click', e => go(e.clientX < innerWidth * .2 ? cur - 1 : cur + 1));
+
+// Test hook: freeze transition i → j at progress p (p = 1 ends it).
+// Successive calls for the same i → j reuse one transition, so a frame-by-frame recorder only pays apply(p).
+// Returns the transition's live duration (ms) so recordings keep the on-screen timing.
+window.__deck = { SLIDES, go, setState, freeze(i, j, p) {
+  if (!(tr && tr.i === i && tr.j === j)) { finish(); cur = i; setState(i); tr = Object.assign(makeTrans(i, j), { i, j }); }
+  const dur = tr.dur; tr.apply(p); if (p >= 1) { finish(); cur = j; }
+  return dur;
+} };
+
+fitStage();
+cur = clamp((parseInt(location.hash.slice(1), 10) || 1) - 1, 0, SLIDES.length - 1);
+document.fonts.ready.then(() => { setState(cur); window.__ready = true; });
+</script>
+</body>
+</html>
