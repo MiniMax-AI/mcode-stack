@@ -129,7 +129,7 @@ GitHub:
 - The workflow sets `permissions: {}` at the top and each job asks for its own: prepare reads code, PRs and issues; review and quiz read code only; grade writes PR comments; publish writes PR comments and threads, and contents too, because GitHub resolves and reopens review threads only for a token that may write contents. publish checks out nothing and runs no model.
 - review and quiz, the jobs that call a model, get the model key and no GitHub token in their environment, and check out the code with `persist-credentials: false`. publish and grade hold the token and never call a model.
 - PRs from forks are skipped, because GitHub gives their workflows no secrets. Do not switch the trigger to `pull_request_target` to review them: that runs untrusted code with the repository's secrets. Draft PRs are skipped until they are ready for review. grade ignores comments by bots.
-- A PR runs the workflow file of its own branch, so anyone who can push a branch can change what the jobs do in their PR. MCode Review keeps secrets from the model, not from people with write access. Such a change shows in the diff and touches the CI risk path of the rule pack.
+- A PR runs the workflow file of its own branch, so anyone who can push a branch can change what the jobs do in their PR. MCode Review keeps the write token from the model, not from people with write access. Such a change shows in the diff and touches the CI risk path of the rule pack.
 
 GitLab:
 
@@ -139,7 +139,8 @@ GitLab:
 
 Both hosts:
 
-- Before a review, agent instruction files that the PR changes (`AGENTS.md`, `CLAUDE.md`, `.mcode-review.json`, `.mcode-review.md` and similar) are restored to the merge-base version. PR titles, descriptions and replies reach the model as untrusted data.
+- Before a review, agent instruction files that the PR changes (`AGENTS.md`, `CLAUDE.md`, `.mcode-review.json`, `.mcode-review.md` and similar) are restored to the merge-base version. PR titles, descriptions and replies in the bot's threads reach the model as untrusted data. On a public repository anyone who can comment on a PR can reply in those threads.
+- The model has a shell and can read what its job holds, the model key included. Exact copies of credential-looking values are removed from what a model job writes; an encoded copy, or one sent over the network, is not caught: the prompts forbid network access, but the runner does not block it. Advise a model key used only by the reviewer, with a spend limit.
 - Model text is stripped of HTML, images and quick actions before it is posted.
 
 ## Verify

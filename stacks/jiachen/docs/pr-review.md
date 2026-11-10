@@ -317,24 +317,32 @@ contact email cannot be worked out from their commits.
   `grade`, which run no model and only the pinned plugin code. On GitLab, the
   bot token and the Feishu secret are scoped to the `mcode-review`
   environment, which only prepare, publish and grade use.
-- **What a model job can read.** GitLab injects every unscoped project and
-  group variable into every job, and a model with a shell can read them.
+- **What a model job can read.** The model has a shell, so it can read what
+  its job holds: the model API key, and on GitLab every unscoped project and
+  group variable. Git credentials are removed before the model starts.
   Everything a model job writes has every credential-looking value removed,
-  and git credentials are removed before the model starts. Keep unrelated
-  secrets scoped or protected all the same.
-- **The PR author.** Secrets are kept from the model, not from the PR author,
-  who can change CI files in their own PR. Such a change shows in the diff and
-  hits the CI risk path of the rule pack. On GitHub, PRs from forks never run
-  the review.
+  but only exact copies are caught. Give the reviewer a model key of its own
+  with a spend limit, and keep unrelated secrets scoped or protected.
+- **Who can steer the model.** PR titles, descriptions and the replies in the
+  bot's threads reach the model as untrusted data, with hidden comments and
+  invisible characters removed, and the code under review can carry such text
+  too. On a public repository anyone who can comment on a PR can reply in
+  those threads. A model that follows injected text could put an encoded key
+  in a finding or send it out over the network. At stake is what the job can
+  read, never the bot's write token.
+- **The PR author.** None of this guards against the PR author, who can
+  change CI files in their own PR. Such a change shows in the diff and hits
+  the CI risk path of the rule pack. On GitHub, PRs from forks never run the
+  review.
 - **Instructions under review.** Before a review, agent instruction files the
   PR changes (`AGENTS.md`, `CLAUDE.md`, `.mcode-review.json`,
   `.mcode-review.md` and similar) are restored to the merge-base version, so a
-  PR cannot change the instructions that review it. PR titles, descriptions
-  and replies reach the model as untrusted data.
+  PR cannot change the instructions that review it.
 - **Output.** Model text is stripped of HTML, images and quick actions before
   the bot posts it.
 - **Read-only review.** The prompts forbid editing files, running builds or
-  tests, and network access during a review.
+  tests, and network access during a review. The runner does not enforce
+  this.
 
 ## Keeping it tuned
 
