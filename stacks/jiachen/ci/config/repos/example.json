@@ -1,0 +1,97 @@
+{
+  "name": "example",
+  "risk_areas": [
+    {
+      "id": "persistence",
+      "name": "Persistence formats and migrations",
+      "globs": [
+        "db/migrations/**",
+        "**/*.sql",
+        "src/storage/**"
+      ],
+      "questions": [
+        "How is existing data migrated? Can an older version still read the data after a downgrade?"
+      ]
+    },
+    {
+      "id": "auth",
+      "name": "Permissions and authentication",
+      "globs": [
+        "src/auth/**",
+        "packages/session-auth/**",
+        "**/*permission*"
+      ],
+      "questions": [
+        "Which entry points are affected? Does an action the user starts by hand get a new block?"
+      ]
+    },
+    {
+      "id": "billing",
+      "name": "Billing, quotas and entitlements",
+      "globs": [
+        "src/billing/**",
+        "**/*quota*"
+      ],
+      "questions": [
+        "How does it behave for existing users and when the quota runs out?"
+      ]
+    },
+    {
+      "id": "ci-release",
+      "name": "CI and release configuration",
+      "globs": [
+        ".gitlab-ci.yml",
+        ".gitlab/**",
+        "ci/**",
+        "scripts/release/**",
+        "Dockerfile*"
+      ],
+      "questions": [
+        "Can this change weaken existing checks or release safeguards?"
+      ]
+    },
+    {
+      "id": "api",
+      "name": "API contracts",
+      "globs": [
+        "api/**/*.proto",
+        "packages/api-schema/**"
+      ],
+      "questions": [
+        "Can old and new clients and servers still work together?"
+      ]
+    }
+  ],
+  "ui_globs": [
+    "apps/web/src/**/*.{tsx,css,scss}",
+    "packages/ui/src/**/*.{tsx,css,scss}"
+  ],
+  "generated_globs": [
+    "**/generated/**",
+    "**/*.generated.*",
+    "**/dist/**",
+    "**/__snapshots__/**",
+    "**/*.min.js",
+    "api/gen/**"
+  ],
+  "tier_thresholds": {
+    "xlFiles": 60,
+    "lFiles": 25,
+    "sFiles": 8
+  },
+  "quiz": {
+    "enabled": true,
+    "questions": 4,
+    "min_code_lines": 120,
+    "min_code_files": 4,
+    "skip_source_branches": [
+      "^(main|dev)$",
+      "^release/",
+      "^chore/sync-"
+    ],
+    "non_product_globs": [
+      "docs-site/**",
+      "e2e/**"
+    ]
+  }
+}

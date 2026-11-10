@@ -1,0 +1,279 @@
+# MCode Review on GitHub Actions: a review of every pull request in this
+# repository, by MiniMax Code, posted as a summary comment and review threads.
+#
+# Copy this file to .github/workflows/mcode-review.yml from a commit of
+# github.com/MiniMax-AI/mcode-stack, and put that full 40-character commit in
+# MCODE_REVIEW_PLUGIN_REF below (never a branch or a tag). To upgrade, copy the
+# file again from the new commit and put the new commit in it; prepare stops
+# when the file and the commit do not belong together.
+#
+# Settings > Secrets and variables > Actions:
+#   secret MCODE_REVIEW_API_KEY      the model API key
+#   variable MCODE_REVIEW_BASE_URL   the model endpoint, such as https://api.minimax.io/anthropic/v1
+#   optional variables MCODE_REVIEW_LANGUAGE (en or zh), MCODE_REVIEW_PHASE,
+#   MCODE_REVIEW_HTTPS_PROXY, MCODE_REVIEW_PLUGIN_ARCHIVE_URL; optional secret
+#   MCODE_REVIEW_GITHUB_TOKEN, a token of a bot account or app to post as (an
+#   app also needs the variable MCODE_REVIEW_BOT_LOGIN, such as my-app[bot]).
+#   The optional Feishu card for the author quiz: variables MCODE_REVIEW_FEISHU_APP_ID,
+#   MCODE_REVIEW_FEISHU_CHAT_ID, MCODE_REVIEW_FEISHU_EMAIL_DOMAINS; secrets
+#   MCODE_REVIEW_FEISHU_APP_SECRET, MCODE_REVIEW_FEISHU_EMAIL_ALIASES.
+# Without the author quiz, the issue_comment trigger and the grade job can go.
+# To let open findings hold a merge, turn on the branch protection rule
+# "Require conversation resolution before merging".
+name: MCode Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created, edited]
+
+# Each job asks for what it needs.
+permissions: {}
+
+env:
+  # The plugin version: a 40-character commit of github.com/MiniMax-AI/mcode-stack.
+  MCODE_REVIEW_PLUGIN_REF: '<40-character commit of mcode-stack>'
+  # The version of this file; prepare stops when the plugin needs another.
+  MCODE_REVIEW_TEMPLATE_VERSION: '1'
+  MCODE_REVIEW_PLUGIN_PATH: stacks/jiachen
+  MCODE_REVIEW_PLUGIN_ARCHIVE_URL: ${{ vars.MCODE_REVIEW_PLUGIN_ARCHIVE_URL }}
+  MCODE_REVIEW_HOST: github
+  MCODE_REVIEW_PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+  MCODE_REVIEW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  MCODE_REVIEW_LANGUAGE: ${{ vars.MCODE_REVIEW_LANGUAGE || 'en' }}
+  MCODE_REVIEW_PHASE: ${{ vars.MCODE_REVIEW_PHASE || 'shadow' }}
+  # A rule pack bundled in ci/config/repos/, without .json. The repository's own
+  # .mcode-review.json goes on top of it.
+  MCODE_REVIEW_REPO_PROFILE: default
+  MCODE_REVIEW_MCODE_VERSION: '0.7.6'
+  MCODE_REVIEW_NPM_REGISTRY: https://registry.npmjs.org/
+  MCODE_REVIEW_BOT_LOGIN: ${{ vars.MCODE_REVIEW_BOT_LOGIN }}
+
+jobs:
+  prepare:
+    name: mcode-review:prepare
+    # A PR from a fork gets no secrets, and a draft waits until it is ready for review.
+    if: >-
+      github.event_name == 'pull_request' &&
+      !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    outputs:
+      lenses: ${{ steps.prepare.outputs.lenses }}
+      quiz: ${{ steps.prepare.outputs.quiz }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download the plugin
+        run: |
+          mkdir -p .mcode-review/plugin-archive
+          curl -fsSL --retry 3 -o .mcode-review/plugin.tar.gz "${MCODE_REVIEW_PLUGIN_ARCHIVE_URL:-https://github.com/MiniMax-AI/mcode-stack/archive/${MCODE_REVIEW_PLUGIN_REF}.tar.gz}"
+          tar -xzf .mcode-review/plugin.tar.gz -C .mcode-review/plugin-archive
+          rm -rf .mcode-review/plugin
+          mv .mcode-review/plugin-archive/*/"${MCODE_REVIEW_PLUGIN_PATH}" .mcode-review/plugin
+          rm -rf .mcode-review/plugin-archive .mcode-review/plugin.tar.gz
+      - name: Prepare
+        id: prepare
+        env:
+          MCODE_REVIEW_GITHUB_TOKEN: ${{ secrets.MCODE_REVIEW_GITHUB_TOKEN || github.token }}
+        run: node .mcode-review/plugin/ci/review.mjs prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mcode-review-plan
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+          path: |
+            .mcode-review/plan.json
+            .mcode-review/diff.patch
+            .mcode-review/added-lines.json
+            .mcode-review/description.md
+            .mcode-review/repo-notes.md
+            .mcode-review/plugin/
+
+  review:
+    name: mcode-review:review (${{ matrix.lens }})
+    needs: prepare
+    if: needs.prepare.outputs.lenses != '' && needs.prepare.outputs.lenses != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    # A direction that fails leaves a gap the summary reports, not a failed run.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        lens: ${{ fromJSON(needs.prepare.outputs.lenses) }}
+    # A newer push never cancels a running direction: the next round waits for
+    # it. GitHub keeps one waiting job per group and cancels an older waiting one.
+    concurrency:
+      group: mcode-review-${{ github.event.pull_request.number }}-${{ matrix.lens }}
+      cancel-in-progress: false
+    # The model runs with a shell: no API token, and the checkout keeps no credentials.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: mcode-review-plan
+          path: .mcode-review
+      - name: Review
+        env:
+          MCODE_REVIEW_LENS: ${{ matrix.lens }}
+          MCODE_REVIEW_API_KEY: ${{ secrets.MCODE_REVIEW_API_KEY }}
+          MCODE_REVIEW_BASE_URL: ${{ vars.MCODE_REVIEW_BASE_URL }}
+          MCODE_REVIEW_HTTPS_PROXY: ${{ vars.MCODE_REVIEW_HTTPS_PROXY }}
+        run: node .mcode-review/plugin/ci/review.mjs lens
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcode-review-out-lens-${{ matrix.lens }}
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+          if-no-files-found: ignore
+          path: .mcode-review/out/lens-${{ matrix.lens }}.json
+
+  quiz:
+    name: mcode-review:quiz
+    needs: prepare
+    if: needs.prepare.outputs.quiz == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    # A newer push cancels a quiz still being written; the next round decides again.
+    concurrency:
+      group: mcode-review-${{ github.event.pull_request.number }}-quiz
+      cancel-in-progress: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: mcode-review-plan
+          path: .mcode-review
+      - name: Quiz
+        env:
+          MCODE_REVIEW_API_KEY: ${{ secrets.MCODE_REVIEW_API_KEY }}
+          MCODE_REVIEW_BASE_URL: ${{ vars.MCODE_REVIEW_BASE_URL }}
+          MCODE_REVIEW_HTTPS_PROXY: ${{ vars.MCODE_REVIEW_HTTPS_PROXY }}
+        run: node .mcode-review/plugin/ci/review.mjs quiz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcode-review-out-quiz
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+          if-no-files-found: ignore
+          path: .mcode-review/out/quiz.json
+
+  publish:
+    name: mcode-review:publish
+    needs: [prepare, review, quiz]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Not cancelled: publish posts threads and the quiz before it writes the state
+    # into the summary comment, and a cancel in between would post them again.
+    concurrency:
+      group: mcode-review-${{ github.event.pull_request.number }}-publish
+      cancel-in-progress: false
+    # GitHub resolves and reopens a review thread only for a token that may also
+    # write contents. publish checks out nothing and runs no model.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: mcode-review-plan
+          path: .mcode-review
+      # Each finished direction and the quiz left a result; a missing one is
+      # reported in the summary.
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: mcode-review-out-*
+          merge-multiple: true
+          path: .mcode-review/out
+      - name: Publish
+        env:
+          MCODE_REVIEW_GITHUB_TOKEN: ${{ secrets.MCODE_REVIEW_GITHUB_TOKEN || github.token }}
+          # The optional Feishu card for the author quiz; nothing is sent without these.
+          MCODE_REVIEW_FEISHU_APP_ID: ${{ vars.MCODE_REVIEW_FEISHU_APP_ID }}
+          MCODE_REVIEW_FEISHU_CHAT_ID: ${{ vars.MCODE_REVIEW_FEISHU_CHAT_ID }}
+          MCODE_REVIEW_FEISHU_APP_SECRET: ${{ secrets.MCODE_REVIEW_FEISHU_APP_SECRET }}
+          MCODE_REVIEW_FEISHU_EMAIL_DOMAINS: ${{ vars.MCODE_REVIEW_FEISHU_EMAIL_DOMAINS }}
+          MCODE_REVIEW_FEISHU_EMAIL_ALIASES: ${{ secrets.MCODE_REVIEW_FEISHU_EMAIL_ALIASES }}
+        run: node .mcode-review/plugin/ci/review.mjs publish
+
+  grade:
+    name: mcode-review:grade
+    # A comment by a person on an open PR: record the author's quiz answers now.
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      github.event.issue.state == 'open' &&
+      github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: mcode-review-${{ github.event.issue.number }}-grade
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      # The default branch, for the repository's .mcode-review.json.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download the plugin
+        run: |
+          mkdir -p .mcode-review/plugin-archive
+          curl -fsSL --retry 3 -o .mcode-review/plugin.tar.gz "${MCODE_REVIEW_PLUGIN_ARCHIVE_URL:-https://github.com/MiniMax-AI/mcode-stack/archive/${MCODE_REVIEW_PLUGIN_REF}.tar.gz}"
+          tar -xzf .mcode-review/plugin.tar.gz -C .mcode-review/plugin-archive
+          rm -rf .mcode-review/plugin
+          mv .mcode-review/plugin-archive/*/"${MCODE_REVIEW_PLUGIN_PATH}" .mcode-review/plugin
+          rm -rf .mcode-review/plugin-archive .mcode-review/plugin.tar.gz
+      - name: Grade
+        env:
+          MCODE_REVIEW_GITHUB_TOKEN: ${{ secrets.MCODE_REVIEW_GITHUB_TOKEN || github.token }}
+          MCODE_REVIEW_FEISHU_APP_ID: ${{ vars.MCODE_REVIEW_FEISHU_APP_ID }}
+          MCODE_REVIEW_FEISHU_CHAT_ID: ${{ vars.MCODE_REVIEW_FEISHU_CHAT_ID }}
+          MCODE_REVIEW_FEISHU_APP_SECRET: ${{ secrets.MCODE_REVIEW_FEISHU_APP_SECRET }}
+          MCODE_REVIEW_FEISHU_EMAIL_DOMAINS: ${{ vars.MCODE_REVIEW_FEISHU_EMAIL_DOMAINS }}
+          MCODE_REVIEW_FEISHU_EMAIL_ALIASES: ${{ secrets.MCODE_REVIEW_FEISHU_EMAIL_ALIASES }}
+        run: node .mcode-review/plugin/ci/review.mjs grade

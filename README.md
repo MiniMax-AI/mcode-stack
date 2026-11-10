@@ -145,7 +145,12 @@ other agents that support skills.
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | Decide whether a hotfix is a real emergency and run expedited review safely |
 
 The table above is [`stacks/ronny`](stacks/ronny/).
-[`stacks/jiachen`](stacks/jiachen/) adds
+[`stacks/jiachen`](stacks/jiachen/) adds **MCode Review**, PR review that has
+to prove its findings: the same rules in your agent
+([`pr-review`](stacks/jiachen/skills/pr-review/SKILL.md)) and in GitHub or
+GitLab CI, a verdict decided by a script, and a weekly loop
+([`pr-review-tuning`](stacks/jiachen/skills/pr-review-tuning/SKILL.md)) that
+tunes its rules on your own PRs. It also adds
 [`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md), which finds
 the loops where you keep acting as a manual step for your agents and lifts you
 out of them, and [`making-content`](stacks/jiachen/skills/making-content/SKILL.md),
@@ -211,7 +216,7 @@ change it. To suggest a change here, open an issue; see
 
 ```text
 stacks/ronny/               Ronny's stack (MiniMax Code R&D lead), the first and most complete one
-stacks/jiachen/             Jiachen's stack: getting out of the agent loop, and turning notes into posts and videos
+stacks/jiachen/             Jiachen's stack: MCode Review (PR review in your agent and in CI), getting out of the agent loop, notes into posts and videos
 stacks/req-tpm/             Optional: the requester and their agent act as a requirement's TPM (Feishu doc body, Meegle status); v0
 stacks/youfang/             Youfang's stack: architecture walkthroughs as Magic Move slide decks, in four styles
 stacks/<name>/              One directory per team member; teammates are welcome to add theirs

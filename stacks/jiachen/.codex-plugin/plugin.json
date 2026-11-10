@@ -1,7 +1,7 @@
 {
   "name": "jiachen",
-  "version": "0.1.1",
-  "description": "Find the loops where you keep acting as a manual step for your agents (retrying, judging, approving, carrying context) and lift yourself out of them, plus a content pipeline that rewrites AI-sounding Chinese drafts and turns material into Xiaohongshu image posts and short vertical videos.",
+  "version": "0.2.0",
+  "description": "MCode Review, PR review that has to prove its findings: the same rules in your agent and in GitHub or GitLab CI, a verdict decided by a script, threads that carry over between pushes, and a weekly loop that tunes the rules on your own history. Plus finding the loops where you keep acting as a manual step for your agents, and a content pipeline that turns material into Xiaohongshu image posts and short vertical videos.",
   "author": {
     "name": "Jiachen (MiniMax Code team)"
   },
@@ -10,16 +10,19 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Jiachen's MCode Stack",
-    "shortDescription": "Find the loops where you keep acting as a manual step for your agents.",
-    "longDescription": "Find the loops where you keep acting as a manual step for your agents (retrying, judging, approving, carrying context) and lift yourself out of them, plus a content pipeline that rewrites AI-sounding Chinese drafts and turns material into Xiaohongshu image posts and short vertical videos.",
+    "shortDescription": "PR review that has to prove its findings, in your agent and in CI.",
+    "longDescription": "MCode Review, PR review that has to prove its findings: the same rules in your agent and in GitHub or GitLab CI, a verdict decided by a script, threads that carry over between pushes, and a weekly loop that tunes the rules on your own history. Plus finding the loops where you keep acting as a manual step for your agents, and a content pipeline that turns material into Xiaohongshu image posts and short vertical videos.",
     "developerName": "Jiachen (MiniMax Code team)",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://github.com/MiniMax-AI/mcode-stack/tree/main/stacks/jiachen",
     "defaultPrompt": [
-      "Look back at this session: where did I keep stepping in by hand?",
-      "Scan my recent agent sessions for repeated manual work",
-      "把这篇草稿改成我的风格，去掉 AI 味"
+      "Review this branch with pr-review before I open the PR",
+      "Set up MCode Review CI on this repository",
+      "Look back at this session: where did I keep stepping in by hand?"
     ]
   }
 }

@@ -1,0 +1,5 @@
+# Personal settings and weekly working data stay out of git. The working
+# directory normally lives in the reviewed repository, which ignores it there;
+# these entries cover a run started from this skill's folder.
+/private/
+/.mcode-review-tuning/

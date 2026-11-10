@@ -1,0 +1,189 @@
+{
+  "name": "default",
+  "risk_areas": [
+    {
+      "id": "persistence",
+      "name": {
+        "en": "Persistence formats and migrations",
+        "zh": "持久化格式和迁移"
+      },
+      "globs": [
+        "**/migrations/**",
+        "**/migration/**",
+        "**/*migration*",
+        "**/*.sql",
+        "**/ddl/**"
+      ],
+      "questions": {
+        "en": [
+          "How is existing data migrated? What happens to the data on a rollback?"
+        ],
+        "zh": [
+          "已有数据怎么迁移？回滚时数据怎么办？"
+        ]
+      }
+    },
+    {
+      "id": "auth",
+      "name": {
+        "en": "Permissions and authentication",
+        "zh": "权限和认证"
+      },
+      "globs": [
+        "**/auth/**",
+        "**/*auth*.{ts,go,js}",
+        "**/*permission*",
+        "**/*credential*",
+        "**/oauth*/**"
+      ],
+      "questions": {
+        "en": [
+          "Which entry points are affected? Are optional authentication and early-return branches covered?"
+        ],
+        "zh": [
+          "哪些入口受影响？可选鉴权和提前返回的分支都覆盖了吗？"
+        ]
+      }
+    },
+    {
+      "id": "billing",
+      "name": {
+        "en": "Billing, quotas and entitlements",
+        "zh": "计费、额度和权益"
+      },
+      "globs": [
+        "**/*billing*",
+        "**/*quota*",
+        "**/*entitlement*",
+        "**/*subscription*"
+      ],
+      "questions": {
+        "en": [
+          "How does it behave for existing users and at quota boundaries?"
+        ],
+        "zh": [
+          "存量用户和边界额度下的行为是什么？"
+        ]
+      }
+    },
+    {
+      "id": "ci-release",
+      "name": {
+        "en": "CI and release configuration",
+        "zh": "CI 和发布配置"
+      },
+      "globs": [
+        ".gitlab-ci.yml",
+        "ci/**",
+        ".gitlab/**",
+        "scripts/ci/**",
+        "scripts/release/**",
+        "Dockerfile*",
+        "**/Dockerfile*"
+      ],
+      "questions": {
+        "en": [
+          "Can this change weaken existing checks or release safeguards?"
+        ],
+        "zh": [
+          "这个改动会不会削弱已有的检查或发布保护？"
+        ]
+      }
+    },
+    {
+      "id": "idl",
+      "name": {
+        "en": "IDL and protocol contracts",
+        "zh": "IDL 和协议契约"
+      },
+      "globs": [
+        "**/idl/**",
+        "**/*.thrift",
+        "**/*.proto",
+        "**/thrift-gen*/**"
+      ],
+      "questions": {
+        "en": [
+          "Can old and new clients and servers still work together?"
+        ],
+        "zh": [
+          "新旧客户端和服务端并存时还能互通吗？"
+        ]
+      }
+    },
+    {
+      "id": "prompt-routing",
+      "name": {
+        "en": "System prompts and model routing",
+        "zh": "system prompt 和模型路由"
+      },
+      "globs": [
+        "**/prompts/**",
+        "**/*system-prompt*",
+        "**/*model-catalog*",
+        "**/*model-routing*",
+        "**/*model-fallback*"
+      ],
+      "questions": {
+        "en": [
+          "Which models and channels behave differently?"
+        ],
+        "zh": [
+          "哪些模型和渠道的行为会变？"
+        ]
+      }
+    },
+    {
+      "id": "updater",
+      "name": {
+        "en": "Auto-update and installers",
+        "zh": "自动更新和安装器"
+      },
+      "globs": [
+        "**/*updater*",
+        "**/*auto-update*",
+        "**/installer*",
+        "**/*installer*.nsh"
+      ],
+      "questions": {
+        "en": [
+          "If an upgrade fails, can users get back to a working state?"
+        ],
+        "zh": [
+          "升级失败时用户能回到可用状态吗？"
+        ]
+      }
+    }
+  ],
+  "stacks": [
+    {
+      "id": "go-backend",
+      "globs": [
+        "**/*.go",
+        "**/go.mod"
+      ]
+    }
+  ],
+  "ui_globs": [
+    "**/*.{tsx,jsx,vue,css,scss,less}"
+  ],
+  "generated_globs": [
+    "**/generated/**",
+    "**/*.generated.*",
+    "**/dist/**",
+    "**/__snapshots__/**",
+    "**/*.min.js"
+  ],
+  "tier_thresholds": {},
+  "quiz": {
+    "enabled": false,
+    "questions": 4,
+    "min_code_lines": 120,
+    "min_code_files": 4,
+    "regen_min_line_delta": 150,
+    "regen_min_file_delta": 3,
+    "max_per_mr": 3,
+    "skip_source_branches": [],
+    "non_product_globs": []
+  }
+}

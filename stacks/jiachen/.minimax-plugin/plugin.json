@@ -1,20 +1,25 @@
 {
   "schemaVersion": 1,
   "name": "jiachen",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "displayName": "Jiachen's MCode Stack",
-  "description": "Find the loops where you keep acting as a manual step for your agents (retrying, judging, approving, carrying context) and lift yourself out of them, plus a content pipeline that rewrites AI-sounding Chinese drafts and turns material into Xiaohongshu image posts and short vertical videos.",
+  "description": "MCode Review, PR review that has to prove its findings: the same rules in your agent and in GitHub or GitLab CI, a verdict decided by a script, threads that carry over between pushes, and a weekly loop that tunes the rules on your own history. Plus finding the loops where you keep acting as a manual step for your agents, and a content pipeline that turns material into Xiaohongshu image posts and short vertical videos.",
   "author": "Jiachen (MiniMax Code team)",
   "icon": "icon.png",
-  "category": "Productivity",
+  "category": "Code",
   "exampleQueries": [
-    "Look back at this session: where did I keep stepping in by hand?",
-    "Scan my recent agent sessions for repeated manual work",
-    "把这篇草稿改成我的风格，去掉 AI 味"
+    "Review this branch with pr-review before I open the PR",
+    "Set up MCode Review CI on this repository",
+    "Look back at this session: where did I keep stepping in by hand?"
   ],
   "apps": [],
   "mcpServers": [],
   "skills": [
+    "skills/pr-review/SKILL.md",
+    "skills/pr-description/SKILL.md",
+    "skills/pr-review-ci/SKILL.md",
+    "skills/pr-review-tuning/SKILL.md",
+    "skills/pr-quiz/SKILL.md",
     "skills/lifting-loops/SKILL.md",
     "skills/making-content/SKILL.md"
   ]

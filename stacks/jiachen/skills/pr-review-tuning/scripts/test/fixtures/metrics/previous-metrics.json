@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "headline": {
+    "prs_reviewed": 5,
+    "threads": 20,
+    "merged_reviewed_share": 0.5,
+    "threads_per_pr_median": 3,
+    "threads_per_pr_p90": 7,
+    "threads_per_pr_max": 9,
+    "replied_share": 0.4,
+    "unanswered_at_merge_share": 0.6,
+    "tokens_per_round_median": 90000,
+    "follow_up_pairs": 2
+  }
+}
