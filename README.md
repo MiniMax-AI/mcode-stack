@@ -43,9 +43,9 @@ Inside a Claude Code session:
 /plugin install ronny --marketplace MiniMax-AI/mcode-stack
 ```
 
-Use `jiachen` or `req-tpm` in place of `ronny` for those stacks. From a clone of this
-repository, `scripts/install.sh` installs `ronny` (`scripts/install.sh jiachen`
-or `scripts/install.sh req-tpm` for the others) with `claude` or `codex` when either is on `PATH`, and
+Use `jiachen`, `req-tpm` or `atlas` in place of `ronny` for those stacks. From a clone of this
+repository, `scripts/install.sh` installs `ronny` (`scripts/install.sh jiachen`,
+`scripts/install.sh req-tpm` or `scripts/install.sh atlas` for the others) with `claude` or `codex` when either is on `PATH`, and
 otherwise copies that stack's skills into `~/.agents/skills/`.
 
 Older Claude Code can add the marketplace first, then install:
@@ -63,7 +63,7 @@ codex plugin marketplace add MiniMax-AI/mcode-stack
 codex plugin add ronny@mcode-stack
 ```
 
-Substitute `jiachen` or `req-tpm` the same way. To take a single skill instead of the
+Substitute `jiachen`, `req-tpm` or `atlas` the same way. To take a single skill instead of the
 plugin, copy that skill's folder into `~/.agents/skills/`. Codex and MiniMax
 Code both scan that directory; the copy steps are below.
 
@@ -163,6 +163,14 @@ v0 and needs the `meegle` and `lark-cli` CLIs plus a one-time look-up of your
 Meegle space's fields and states; see
 [`stacks/req-tpm/README.md`](stacks/req-tpm/README.md).
 
+[`stacks/atlas`](stacks/atlas/) has
+[`magic-move-deck`](stacks/atlas/skills/magic-move-deck/SKILL.md), which
+turns an architecture or flow walkthrough into a Keynote-style Magic Move
+slide deck: every slide is a diagram seen through a camera, and the boxes and
+titles two slides share morph between them. The agent shows one sample slide
+in each of four styles (hand-drawn, minimal, dark neon, neo-brutalist) and
+builds the deck in the one you pick, as a single offline HTML file.
+
 A stack usually has three kinds of things:
 
 | Kind | What it is | How to use it |
@@ -205,6 +213,7 @@ change it. To suggest a change here, open an issue; see
 stacks/ronny/               Ronny's stack (MiniMax Code R&D lead), the first and most complete one
 stacks/jiachen/             Jiachen's stack: getting out of the agent loop, and turning notes into posts and videos
 stacks/req-tpm/             Optional: the requester and their agent act as a requirement's TPM (Feishu doc body, Meegle status); v0
+stacks/atlas/               Atlas's stack: architecture walkthroughs as Magic Move slide decks, in four styles
 stacks/<name>/              One directory per team member; teammates are welcome to add theirs
 notes/                      Which runnable piece goes with each Engineering Notes article
 community/                  Stacks from outside the team, added by collaborators
@@ -212,8 +221,9 @@ templates/stack-template/   Template for a new stack
 ```
 
 Every stack is also a MiniMax Code plugin package. See
-[`stacks/ronny`](stacks/ronny/), [`stacks/jiachen`](stacks/jiachen/) and
-[`stacks/req-tpm`](stacks/req-tpm/) for what each one contains.
+[`stacks/ronny`](stacks/ronny/), [`stacks/jiachen`](stacks/jiachen/),
+[`stacks/req-tpm`](stacks/req-tpm/) and [`stacks/atlas`](stacks/atlas/) for
+what each one contains.
 
 ## Contributing
 

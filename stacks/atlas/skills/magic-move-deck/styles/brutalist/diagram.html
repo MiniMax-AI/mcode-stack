@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!--
+  Magic Move deck style: brutalist (新野兽派)
+  - Cream paper, thick black outlines, flat saturated fills, hard offset shadows under boxes, square corners
+  - Heavy grotesque typography: Helvetica Neue / Arial for Latin, PingFang SC / Microsoft YaHei / Noto Sans SC for Chinese
+  - Same 9 role slots, helper names and signatures as every other style template (styles/*/diagram.html),
+    so one main() renders in any style. Edit main() at the bottom only; keep the helpers untouched.
+  - Hard rules: no emoji; node text color = node stroke color (black, except the red error slot);
+    arrows are C.flow; red only for exceptions.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f4efe4;
+    font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; }
+  .stage { position: relative; background: #f4efe4; }
+  canvas { display: block; }
+  .label { position: absolute; pointer-events: none; line-height: 1.22; }
+  .ti { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; font-weight: 700; }
+  .bd { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; font-weight: 400; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"
+        integrity="sha384-1NLkwxMO2sOqcq7rQkFBhIAUJtbt8ziLxhVKVgKfFGMEU8pF+GEq5LVogviveup6"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<!-- Set canvas size to whatever your diagram needs -->
+<div class="stage" style="width: 1920px; height: 1080px;">
+  <canvas id="c" width="1920" height="1080"></canvas>
+  <div id="labels"></div>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// ============================================================
+//  STYLE NORMALISER — every rough.js call (helpers and main() alike) is drawn with this
+//  style's options, so a main() written for another style still comes out clean here.
+//  build_deck.py mirrors shapes into SVG through the same restyle(), so the deck matches.
+// ============================================================
+const OPT_AT = { line: 4, rectangle: 4, ellipse: 4, circle: 3, linearPath: 1, polygon: 1, arc: 7, curve: 1, path: 1 };
+function restyle(a, m) {
+  const b = a.slice(), i = OPT_AT[m];
+  while (b.length < i) b.push(undefined);
+  const o = Object.assign({}, b[i] || {});
+  o.roughness = 0; o.bowing = 0; o.disableMultiStroke = true; o.disableMultiStrokeFill = true;
+  o.strokeWidth = Math.max(1.6, (o.strokeWidth ?? 1) * 1.15);
+  if (o.fillStyle && o.fillStyle !== 'solid') o.fillStyle = 'solid';
+  b[i] = o;
+  return b;
+}
+const rc = rough.canvas(canvas);
+for (const m in OPT_AT) { const f = rc[m].bind(rc); rc[m] = (...a) => f(...restyle(a, m)); }
+
+// Canonical font stacks — keep in sync with CSS .ti / .bd above.
+const FONT_TI = `'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif`;
+const FONT_BD = FONT_TI;
+
+// ============================================================
+//  PALETTE — 9 fixed role slots: flat saturated fills, black ink.
+//  stroke = node-internal text color too; every stroke ≥ 4.5:1 against its fill (see STYLE.md).
+// ============================================================
+const INK = '#111111', SHADOW = '#111111';
+const C = {
+  user:     { stroke: INK, fill: '#8ecbff' },        // sky
+  im:       { stroke: INK, fill: '#6fe3c8' },        // mint
+  agent:    { stroke: INK, fill: '#ff9248' },        // orange (main subject)
+  subagent: { stroke: INK, fill: '#ffd84d' },        // yellow
+  llm:      { stroke: INK, fill: '#bda6ff' },        // lavender
+  tools:    { stroke: INK, fill: '#9be870' },        // green
+  memory:   { stroke: INK, fill: '#ffa8d5' },        // pink
+  external: { stroke: INK, fill: '#ddd6c6' },        // stone
+  error:    { stroke: '#c8102e', fill: '#ffe0e0' },  // red (exceptions only)
+  flow:     INK,                                     // all arrows
+  bg:       '#f4efe4',                               // canvas background
+  title:    INK,
+  subtitle: '#3d3a35',
+  caption:  '#5b574f',
+  glow:     null,
+  card: { stroke: INK, fill: '#fffaf0', accent: '#ff5c39', title: INK, text: INK, muted: '#5b574f',
+          glass: 'linear-gradient(160deg, rgba(255,146,72,.30) 0%, rgba(255,216,77,.22) 45%, rgba(244,239,228,.55) 80%, rgba(244,239,228,.7) 100%)',
+          pane: 'rgba(255,250,240,.65)', shadow: 'none' },   // the card's box() already draws a hard shadow
+};
+
+// rough.js baseline (restyle() then makes it crisp: roughness 0, 1.15× stroke width).
+const opts = (color, o = {}) => Object.assign({
+  stroke: color.stroke,
+  fill:   color.fill,
+  fillStyle: 'solid',
+  strokeWidth: 2.4,
+  roughness: 1.6,
+  bowing: 1.4,
+}, o);
+
+// ============================================================
+//  ARROW — thick line + filled triangle head; pass { strokeLineDash: [10,7] } for dashed,
+//  { stroke: C.error.stroke, strokeLineDash: [10,7] } for the error path.
+// ============================================================
+function arrow(x1, y1, x2, y2, o = {}) {
+  const op = Object.assign({ stroke: C.flow, strokeWidth: 2, roughness: 1.4 }, o);
+  const a = Math.atan2(y2 - y1, x2 - x1), L = 16, back = L * 0.8;
+  rc.line(x1, y1, x2 - back * Math.cos(a), y2 - back * Math.sin(a), op);
+  rc.polygon([[x2, y2],
+              [x2 - L * Math.cos(a - Math.PI / 6.5), y2 - L * Math.sin(a - Math.PI / 6.5)],
+              [x2 - L * Math.cos(a + Math.PI / 6.5), y2 - L * Math.sin(a + Math.PI / 6.5)]],
+             Object.assign({}, op, { strokeLineDash: undefined, fill: op.stroke, fillStyle: 'solid', strokeWidth: 1 }));
+}
+
+// ============================================================
+//  SHAPE HELPERS
+// ============================================================
+// Box — generic entity: hard offset shadow, then the box. The shadow is drawn right before the box with
+// the same stroke, so the deck treats the pair as one node (stacked copies) and moves them together.
+const OFFSET = 7;
+function box(x, y, w, h, color, override = {}) {
+  rc.rectangle(x + OFFSET, y + OFFSET, w, h, opts(color, Object.assign({}, override, { fill: SHADOW })));
+  rc.rectangle(x, y, w, h, opts(color, override));
+}
+
+// Channel — flat horizontal strip (IM / Queue / Bus)
+function channel(x, y, w, h, color) {
+  rc.rectangle(x + 5, y + 5, w, h, opts(color, { strokeWidth: 2.2, fill: SHADOW }));
+  rc.rectangle(x, y, w, h, opts(color, { strokeWidth: 2.2 }));
+}
+
+// Task Card — folded-corner note (work unit / job / task)
+function taskCard(x, y, w, h, color) {
+  const fold = 14;
+  rc.path(`M${x} ${y} L${x+w-fold} ${y} L${x+w} ${y+fold} L${x+w} ${y+h} L${x} ${y+h} Z`, opts(color, { strokeWidth: 1.8 }));
+  rc.path(`M${x+w-fold} ${y} L${x+w-fold} ${y+fold} L${x+w} ${y+fold}`, { stroke: color.stroke, strokeWidth: 1.6 });
+}
+
+// Bubble — speech bubble for Status / Notification (left or right tail)
+function bubble(x, y, w, h, color, tailSide = 'left') {
+  rc.rectangle(x, y, w, h, opts(color, { strokeWidth: 2 }));
+  const tailY = y + h * 0.5, s = tailSide === 'left' ? -1 : 1, bx = tailSide === 'left' ? x : x + w;
+  rc.path(`M${bx} ${tailY-10} L${bx + s * 15} ${tailY} L${bx} ${tailY+10}`,
+    { stroke: color.stroke, fill: color.fill, fillStyle: 'solid', strokeWidth: 2 });
+}
+
+// Hexagon — Error / Decision / fallback
+function hexagon(cx, cy, w, h, color) {
+  const dx = w / 2, dy = h / 2, ear = w * 0.18;
+  rc.polygon([[cx - dx + ear, cy - dy], [cx + dx - ear, cy - dy], [cx + dx, cy],
+              [cx + dx - ear, cy + dy], [cx - dx + ear, cy + dy], [cx - dx, cy]], opts(color));
+}
+
+// Timeline — horizontal dashed line with tick marks
+function timeline(x1, y, x2, marks /* [{x,text}] — text rendered separately via plain() */) {
+  rc.line(x1, y, x2, y, { stroke: C.flow, strokeWidth: 1.8, strokeLineDash: [8, 8] });
+  marks.forEach(m => rc.rectangle(m.x - 6, y - 6, 12, 12, { stroke: C.flow, fill: C.flow, fillStyle: 'solid', strokeWidth: 1.5 }));
+}
+
+// ============================================================
+//  TEXT HELPERS — all text goes through HTML labels (title/subtitle are canvas text,
+//  which build_deck.py re-issues as HTML). `text` / `sub` are HTML: escape '<' and '&'.
+// ============================================================
+const L = document.getElementById('labels');
+
+// Two-line label: bold title + regular subtitle
+function lbl({ text, sub, x, y, w, color, size=24, subSize=16, align='center' }) {
+  const div = document.createElement('div');
+  div.className = 'label';
+  div.style.left = x + 'px'; div.style.top = y + 'px';
+  div.style.width = w + 'px'; div.style.textAlign = align;
+  div.style.color = color;
+  div.innerHTML = `
+    <div class="ti" style="font-size:${size}px;font-weight:700">${text}</div>
+    ${sub ? `<div class="bd" style="font-size:${subSize}px;color:${color};opacity:.85;margin-top:3px">${sub}</div>` : ''}
+  `;
+  L.appendChild(div);
+}
+
+// Single-line plain label (arrow labels, bubble content, captions)
+function plain({ text, x, y, w, color='#111111', size=18, weight=400, bg=null, align='center' }) {
+  const div = document.createElement('div');
+  div.className = 'label bd';
+  div.style.left = x + 'px'; div.style.top = y + 'px';
+  div.style.width = w + 'px'; div.style.textAlign = align;
+  div.style.color = color; div.style.fontSize = size + 'px';
+  div.style.fontWeight = weight;
+  if (bg) { div.style.background = bg; div.style.padding = '1px 6px'; }
+  div.innerHTML = text;
+  L.appendChild(div);
+}
+
+// Canvas title / subtitle (build_deck.py turns them into movable HTML text with the same font)
+function title(text, x, y, size=44) {
+  ctx.font = `700 ${size}px ${FONT_TI}`;
+  ctx.fillStyle = C.title;
+  ctx.fillText(text, x, y);
+}
+function subtitle(text, x, y, size=22) {
+  ctx.font = `400 ${size}px ${FONT_BD}`;
+  ctx.fillStyle = C.subtitle;
+  ctx.fillText(text, x, y);
+}
+
+// Label background = canvas color, slightly translucent. Use for any label that sits on a line.
+const LABEL_BG = 'rgba(244,239,228,.95)';
+
+// ============================================================
+//  COMPOSITE HELPERS
+// ============================================================
+// Node — box + vertically centered two-line label in the box's stroke color.
+function node(x, y, w, h, color, text, sub, o = {}) {
+  const size = o.size || 23, subSize = o.subSize || 15;
+  box(x, y, w, h, color, o.box || {});
+  const textH = size * 1.22 + (sub ? 3 + subSize * 1.22 : 0);
+  lbl({ text, sub, x, y: y + (h - textH) / 2, w, color: color.stroke, size, subSize });
+}
+
+// Group Frame — dashed black boundary; its title is a tag filled with the group's color.
+// Lines only (no fill), so it never paints over the nodes inside.
+function frame(x, y, w, h, color, label, labelW = 160) {
+  const o = { stroke: color.stroke, strokeWidth: 1.8, strokeLineDash: [12, 7] };
+  rc.line(x, y, x + w, y, o);
+  rc.line(x + w, y, x + w, y + h, o);
+  rc.line(x + w, y + h, x, y + h, o);
+  rc.line(x, y + h, x, y, o);
+  if (label) plain({ text: label, x: x + 18, y: y - 13, w: labelW, color: color.stroke,
+                     size: 17, weight: 700, bg: color.fill, align: 'left' });
+}
+
+// Legend — color key. Required when a diagram uses more than 5 colors; list only colors used.
+function legend(x, y, items, cols = 3, colW = 300) {
+  plain({ text: '图例 · Legend', x, y: y - 30, w: 200, color: C.title, size: 20, weight: 700, align: 'left' });
+  items.forEach((it, i) => {
+    const ix = x + (i % cols) * colW, iy = y + Math.floor(i / cols) * 62;
+    rc.rectangle(ix, iy, 36, 26, opts(it.c, { strokeWidth: 2 }));
+    plain({ text: it.n, x: ix + 48, y: iy - 1, w: colW - 60, color: it.c.stroke, size: 19, weight: 700, align: 'left' });
+    if (it.z) plain({ text: it.z, x: ix + 48, y: iy + 24, w: colW - 60, color: C.caption, size: 15, align: 'left' });
+  });
+}
+
+// ============================================================
+//  MAIN — replace this with your own diagram
+// ============================================================
+function main() {
+  title('Diagram Title · 副标题', 70, 70);
+  subtitle('一句话描述 · 用于多图统一开篇', 70, 105);
+  box(120, 200, 200, 110, C.user);
+  box(770, 195, 340, 150, C.agent, { strokeWidth: 3 });
+  arrow(320, 255, 768, 270);
+  lbl({ text: 'User',  sub: '用户', x: 120, y: 222, w: 200, color: C.user.stroke });
+  lbl({ text: 'Agent', sub: '主 Agent', x: 770, y: 222, w: 340, color: C.agent.stroke, size: 30 });
+  plain({ text: '① 提问', x: 380, y: 235, w: 80, color: C.flow, bg: LABEL_BG, size: 17 });
+}
+
+main();
+window.__renderDone = true;
+</script>
+</body>
+</html>
