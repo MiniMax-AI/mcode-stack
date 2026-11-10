@@ -41,10 +41,10 @@
       "category": "Productivity"
     },
     {
-      "name": "atlas",
+      "name": "youfang",
       "source": {
         "source": "local",
-        "path": "./stacks/atlas"
+        "path": "./stacks/youfang"
       },
       "policy": {
         "installation": "AVAILABLE",

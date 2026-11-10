@@ -9,7 +9,7 @@ MiniMax Code plugin package.
 | [`ronny`](ronny/) | Ronny, R&D lead | Skills and plain-text checklists |
 | [`jiachen`](jiachen/) | Jiachen, engineer | Skills and a `WORKFLOW.md` |
 | [`req-tpm`](req-tpm/) | MiniMax Code team | Optional, v0: the requester and their agent act as a requirement's TPM (Feishu doc body, Meegle status). Skills, templates and a `WORKFLOW.md` |
-| [`atlas`](atlas/) | Atlas, engineer | A skill that turns diagram walkthroughs into Magic Move slide decks (four styles, sample first), and a `WORKFLOW.md` |
+| [`youfang`](youfang/) | Youfang, engineer | A skill that turns diagram walkthroughs into Magic Move slide decks (four styles, sample first), and a `WORKFLOW.md` |
 
 Teammates are welcome to add their own; see below.
 

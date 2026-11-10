@@ -1,6 +1,6 @@
-# atlas
+# youfang
 
-The stack of Atlas, an engineer on MiniMax Code: one skill that turns an
+The stack of Youfang, an engineer on MiniMax Code: one skill that turns an
 architecture or flow walkthrough into a Keynote-style **Magic Move** slide
 deck. Every slide is a diagram seen through a camera, and the boxes, labels
 and titles two slides share morph and fly instead of cross-fading. The agent
@@ -18,27 +18,27 @@ builds the whole deck in that style.
 In Claude Code, one command installs this stack. In a shell:
 
 ```bash
-claude plugin install atlas --marketplace MiniMax-AI/mcode-stack
+claude plugin install youfang --marketplace MiniMax-AI/mcode-stack
 ```
 
 Inside a session:
 
 ```bash
-/plugin install atlas --marketplace MiniMax-AI/mcode-stack
+/plugin install youfang --marketplace MiniMax-AI/mcode-stack
 ```
 
 Older Claude Code can add the marketplace first, then install:
 
 ```bash
 /plugin marketplace add MiniMax-AI/mcode-stack
-/plugin install atlas@mcode-stack
+/plugin install youfang@mcode-stack
 ```
 
 In Codex, add the marketplace, then install from the Plugins Directory or the CLI:
 
 ```bash
 codex plugin marketplace add MiniMax-AI/mcode-stack
-codex plugin add atlas@mcode-stack
+codex plugin add youfang@mcode-stack
 ```
 
 In MiniMax Code, copy this whole directory into the local plugin directory

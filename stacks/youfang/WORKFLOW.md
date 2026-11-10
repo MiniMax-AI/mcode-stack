@@ -1,4 +1,4 @@
-# Atlas's day with MiniMax Code
+# Youfang's day with MiniMax Code
 
 > **Draft.** Written from how the agent and I build talk decks today; I will
 > rewrite it in my own words.
