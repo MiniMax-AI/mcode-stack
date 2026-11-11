@@ -1,0 +1,212 @@
+# MCode Review child pipeline for a GitLab project.
+#
+# Copy this file to .gitlab/mcode-review.gitlab-ci.yml in the project, from the
+# same commit of github.com/MiniMax-AI/mcode-stack that the dispatch job sets as
+# MCODE_REVIEW_PLUGIN_REF, and paste the dispatch job in
+# ci/gitlab/dispatch.gitlab-ci.yml into the project's .gitlab-ci.yml. prepare
+# stops when this copy and the plugin commit do not belong together
+# (MCODE_REVIEW_TEMPLATE_VERSION).
+#
+# Every job runs one subcommand of ci/review.mjs from the plugin at that
+# commit. prepare downloads the plugin archive (no token needed) and passes it
+# on as an artifact; review and quiz run that copy:
+#   mcode-review:prepare  GitLab token, no model: tier, review directions, net-diff
+#                         fingerprints, duplication hints, state of the last round,
+#                         the repository's rules from the merge base, whether this
+#                         round writes an author quiz
+#   mcode-review:review   model key: one job per review direction; directions the
+#                         tier does not use exit at once. A newer push does not
+#                         cancel a running direction: the next round of the merge
+#                         request waits for it in the direction's resource group
+#                         and reuses its result
+#   mcode-review:quiz     model key: the author quiz when prepare asks for one;
+#                         otherwise it exits at once
+#   mcode-review:publish  GitLab token, no model: verdict, summary note, review
+#                         threads, quiz note and answer record, and the Feishu
+#                         card when MCODE_REVIEW_FEISHU_* are set
+#   mcode-review:grade    manual, GitLab token: records the author's answers
+#                         right away instead of at the next push
+#
+# The project sets these CI variables: MCODE_REVIEW_API_KEY,
+# MCODE_REVIEW_BASE_URL, and MCODE_REVIEW_GITLAB_TOKEN scoped to the
+# mcode-review environment. MCODE_REVIEW_HTTPS_PROXY is optional; without it
+# the model calls use no proxy.
+#
+# The GitLab token and the Feishu secret are scoped to the mcode-review
+# environment, so jobs that call a model never receive them. Those jobs still
+# receive every unscoped project and group variable, and a model with a shell
+# can read them; review.mjs strips every credential-looking value from what
+# those jobs write. The scope keeps secrets from the model, not from the author
+# of a merge request, who can edit the project's CI file in it.
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline" && $CI_MERGE_REQUEST_IID && $MCODE_REVIEW_PLUGIN_REF'
+    - when: never
+
+stages:
+  - prepare
+  - review
+  - publish
+
+variables:
+  # MCODE_REVIEW_PLUGIN_REF (the mcode-stack commit to run) comes from the
+  # dispatch job; prepare stops when it is not a 40-character commit. The
+  # dispatch job also sets MCODE_REVIEW_REPO_PROFILE (a file name in
+  # ci/config/repos without .json); the repository's own .mcode-review.json
+  # goes on top of it. The values below are defaults; the dispatch job's
+  # variables and project variables override them.
+  MCODE_REVIEW_REPO_PROFILE: 'default'
+  MCODE_REVIEW_PLUGIN_PATH: 'stacks/jiachen'
+  # The version of this file; prepare stops when the plugin needs another.
+  MCODE_REVIEW_TEMPLATE_VERSION: '1'
+  MCODE_REVIEW_HOST: 'gitlab'
+  MCODE_REVIEW_PHASE: 'shadow'
+  # Language of everything the bot posts: 'en' (English) or 'zh' (Simplified
+  # Chinese). Job logs stay in English.
+  MCODE_REVIEW_LANGUAGE: 'en'
+  MCODE_REVIEW_MCODE_VERSION: '0.7.6'
+  MCODE_REVIEW_NPM_REGISTRY: 'https://registry.npmjs.org/'
+  npm_config_nodedir: '/usr/local'
+
+.mcode-review:base:
+  image: node:22
+  allow_failure: true
+  interruptible: true
+  # No retry on a timeout: a model job that ran out of time would run, and pay,
+  # the whole budget again.
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - api_failure
+  # MCODE_REVIEW_PLUGIN_ARCHIVE_URL points the download at a fork or a mirror:
+  # a tar.gz whose one top-level directory holds MCODE_REVIEW_PLUGIN_PATH.
+  before_script:
+    - cd "$CI_PROJECT_DIR"
+    - >-
+      mkdir -p .mcode-review/plugin-archive &&
+      curl -fsSL --retry 3 -o .mcode-review/plugin.tar.gz "${MCODE_REVIEW_PLUGIN_ARCHIVE_URL:-https://github.com/MiniMax-AI/mcode-stack/archive/${MCODE_REVIEW_PLUGIN_REF}.tar.gz}" &&
+      tar -xzf .mcode-review/plugin.tar.gz -C .mcode-review/plugin-archive &&
+      rm -rf .mcode-review/plugin &&
+      mv .mcode-review/plugin-archive/*/"${MCODE_REVIEW_PLUGIN_PATH}" .mcode-review/plugin &&
+      rm -rf .mcode-review/plugin-archive .mcode-review/plugin.tar.gz
+
+mcode-review:prepare:
+  extends: .mcode-review:base
+  stage: prepare
+  needs: []
+  timeout: 15m
+  environment:
+    name: mcode-review
+    action: prepare
+  script:
+    - node .mcode-review/plugin/ci/review.mjs prepare
+  artifacts:
+    when: always
+    access: developer
+    expire_in: 1 week
+    paths:
+      - .mcode-review/plan.json
+      - .mcode-review/diff.patch
+      - .mcode-review/added-lines.json
+      - .mcode-review/description.md
+      - .mcode-review/repo-notes.md
+      - .mcode-review/plugin/
+
+mcode-review:review:
+  extends: .mcode-review:base
+  stage: review
+  needs:
+    - job: mcode-review:prepare
+      artifacts: true
+  timeout: 80m
+  # A running direction is never cancelled by a newer push; its result is
+  # reused. Rounds of one merge request queue per direction in this resource group, so the
+  # next round starts after it and reviews only the files changed since. A round
+  # still queued when an even newer push arrives is cancelled, or skips itself
+  # without calling a model once its turn comes.
+  interruptible: false
+  resource_group: 'mcode-review-$CI_MERGE_REQUEST_IID-$MCODE_REVIEW_LENS'
+  parallel:
+    matrix:
+      - MCODE_REVIEW_LENS: [general, behavior, contracts, security, cross-feature, duplication]
+  # The plugin comes from prepare's artifacts.
+  before_script:
+    - cd "$CI_PROJECT_DIR"
+  script:
+    - node .mcode-review/plugin/ci/review.mjs lens
+  artifacts:
+    when: always
+    access: developer
+    expire_in: 1 week
+    paths:
+      - .mcode-review/out/
+
+mcode-review:quiz:
+  extends: .mcode-review:base
+  stage: review
+  needs:
+    - job: mcode-review:prepare
+      artifacts: true
+  # Room for a 15 minute model call, a schema repair and one rewrite.
+  timeout: 40m
+  # A newer push cancels a quiz still being written; the next round decides
+  # again. The job exits at once when prepare decided on no quiz.
+  interruptible: true
+  # The plugin comes from prepare's artifacts.
+  before_script:
+    - cd "$CI_PROJECT_DIR"
+  script:
+    - node .mcode-review/plugin/ci/review.mjs quiz
+  artifacts:
+    when: always
+    access: developer
+    expire_in: 1 week
+    paths:
+      - .mcode-review/out/quiz.json
+
+mcode-review:publish:
+  extends: .mcode-review:base
+  stage: publish
+  needs:
+    - job: mcode-review:prepare
+      artifacts: true
+    - job: mcode-review:review
+      artifacts: true
+    - job: mcode-review:quiz
+      artifacts: true
+  when: always
+  timeout: 15m
+  # Not interruptible: publish posts threads, the quiz and the answer record
+  # before it writes the state into the summary note, and a cancel in between
+  # would post them again next round. It exits by itself when the head of the
+  # merge request has moved.
+  interruptible: false
+  environment:
+    name: mcode-review
+    action: prepare
+  script:
+    - node .mcode-review/plugin/ci/review.mjs publish
+  artifacts:
+    when: always
+    access: developer
+    expire_in: 1 week
+    paths:
+      - .mcode-review/out/summary.md
+      - .mcode-review/out/verdict.json
+
+mcode-review:grade:
+  extends: .mcode-review:base
+  stage: publish
+  needs: []
+  when: manual
+  allow_failure: true
+  timeout: 10m
+  # Same reason as publish: it posts the record before it updates the card.
+  interruptible: false
+  environment:
+    name: mcode-review
+    action: prepare
+  script:
+    - node .mcode-review/plugin/ci/review.mjs grade

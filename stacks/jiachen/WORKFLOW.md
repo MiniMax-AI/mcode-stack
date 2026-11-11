@@ -36,6 +36,33 @@ no conflicts, CI is green and the reasonable AI review comments are fixed;
 for the rest it writes why they were not taken. Merging, publishing and
 sending messages stay with me.
 
+## Review before anyone else does
+
+Before I ask a teammate, the agent runs `pr-review` on the branch: the same
+rules CI applies, on my own model, with nothing posted. For a large or risky
+change I name the directions I worry about, for example "security and
+permissions only". Then `pr-description` drafts the description: why, what
+changes in behavior, how it was verified, how to roll it back.
+
+## Every PR gets a reviewer that has to prove it
+
+In CI, MCode Review reviews every push and keeps one summary comment and one
+thread per finding or question. A finding blocks only with a traced failure
+path that a second pass could not refute, and a script, not a model, gives the
+verdict. I answer in the threads; when I disagree I say why and resolve the
+thread, and it does not come back. After three blocking rounds in a row the
+verdict turns to "needs a person": I stop the agents and rethink the approach
+instead of letting them take more turns.
+
+## The reviewer is tuned like code
+
+Once a week `pr-review-tuning` measures the reviewer on our PRs: threads per
+PR, which kinds people answer or dismiss, what was still unanswered at merge,
+and which later fixes point back at a PR it passed. It proposes at most three
+rule changes, backtests them on past PRs with known bugs within a token budget
+I agree to, has a separate pass recompute its numbers, and changes nothing
+until I approve.
+
 ## Push back early
 
 If a task looks not worth doing, or the outcome is fixed by conditions
@@ -52,5 +79,9 @@ started as a loop it found.
 
 | Moment | Skill |
 | --- | --- |
-| After a long session, or once a week | `lifting-loops` |
+| Before asking for a review | `pr-review` |
+| Opening the PR | `pr-description` |
+| Adding the CI review to a repository, or upgrading it | `pr-review-ci` |
+| Once a week, for the reviewer | `pr-review-tuning` |
+| After a long session, or once a week, for me | `lifting-loops` |
 | Turning notes or research into a post or a short video | `making-content` |

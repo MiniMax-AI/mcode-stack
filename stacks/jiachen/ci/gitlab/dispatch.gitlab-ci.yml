@@ -1,0 +1,30 @@
+# MCode Review dispatch job for GitLab CI: paste it into the project's
+# .gitlab-ci.yml. It starts the child pipeline in .gitlab/mcode-review.gitlab-ci.yml,
+# a copy of ci/gitlab/review.gitlab-ci.yml from the commit in
+# MCODE_REVIEW_PLUGIN_REF below. Use a stage the project already has, and set
+# the CI variables MCODE_REVIEW_API_KEY, MCODE_REVIEW_BASE_URL and
+# MCODE_REVIEW_GITLAB_TOKEN (environment scope mcode-review).
+review:mcode-review:dispatch:
+  stage: test # use a stage the project already has
+  needs: []
+  allow_failure: true
+  variables:
+    # The plugin version: a 40-character commit of github.com/MiniMax-AI/mcode-stack.
+    MCODE_REVIEW_PLUGIN_REF: '<40-character commit of mcode-stack>'
+    # A rule pack bundled in ci/config/repos/, without .json. The repository's
+    # own .mcode-review.json goes on top of it.
+    MCODE_REVIEW_REPO_PROFILE: 'default'
+  trigger:
+    include:
+      - local: '.gitlab/mcode-review.gitlab-ci.yml'
+    forward:
+      yaml_variables: true
+      # Variables of a manually run pipeline stay out of the child pipeline.
+      pipeline_variables: false
+  rules:
+    # A draft merge request gets a manual job: the review runs when someone
+    # starts it. A manual rule would hold the pipeline without allow_failure.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^\s*(\[draft\]|\(draft\)|draft:)/i'
+      when: manual
+      allow_failure: true
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

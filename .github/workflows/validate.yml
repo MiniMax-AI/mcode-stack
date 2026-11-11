@@ -31,6 +31,10 @@ jobs:
         with:
           node-version: 22
 
+      - name: Test the MCode Review code in stacks/jiachen
+        working-directory: stacks/jiachen
+        run: node --test ci/test/*.test.mjs skills/pr-review-tuning/scripts/test/*.test.mjs
+
       - name: Check all stacks
         env:
           MINIMAX_CODE_DIR: .minimax-code

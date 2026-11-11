@@ -7,7 +7,7 @@ MiniMax Code plugin package.
 | Stack | Owner | What it has |
 | --- | --- | --- |
 | [`ronny`](ronny/) | Ronny, R&D lead | Skills and plain-text checklists |
-| [`jiachen`](jiachen/) | Jiachen, engineer | Skills and a `WORKFLOW.md` |
+| [`jiachen`](jiachen/) | Jiachen, engineer | MCode Review: PR review in your agent and in GitHub or GitLab CI, with a weekly loop that tunes its rules; plus `lifting-loops` and `making-content`. Skills, CI code and a `WORKFLOW.md` |
 | [`req-tpm`](req-tpm/) | MiniMax Code team | Optional, v0: the requester and their agent act as a requirement's TPM (Feishu doc body, Meegle status). Skills, templates and a `WORKFLOW.md` |
 | [`youfang`](youfang/) | Youfang, engineer | A skill that turns diagram walkthroughs into Magic Move slide decks (four styles, sample first), and a `WORKFLOW.md` |
 

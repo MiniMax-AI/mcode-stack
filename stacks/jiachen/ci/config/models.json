@@ -1,0 +1,48 @@
+{
+  "provider": {
+    "id": "mcode-review",
+    "name": "mcode-review",
+    "api": "anthropic-messages",
+    "headers": {}
+  },
+  "models": {
+    "MiniMax-M3.1-Flash": {
+      "api": "anthropic-messages",
+      "context": 512000,
+      "output": 128000,
+      "efforts": [
+        "high"
+      ]
+    }
+  },
+  "roles": {
+    "lens": {
+      "chain": [
+        "MiniMax-M3.1-Flash"
+      ],
+      "effort": "high"
+    },
+    "verify": {
+      "chain": [
+        "MiniMax-M3.1-Flash"
+      ],
+      "effort": "high"
+    },
+    "quiz": {
+      "chain": [
+        "MiniMax-M3.1-Flash"
+      ],
+      "effort": "high"
+    }
+  },
+  "timeouts": {
+    "lens": {
+      "S": 900,
+      "M": 1500,
+      "L": 1800,
+      "XL": 2400
+    },
+    "verify": 600,
+    "quiz": 900
+  }
+}

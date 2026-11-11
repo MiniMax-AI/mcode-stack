@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "questions"
+  ],
+  "properties": {
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dimension",
+          "prompt",
+          "options",
+          "answer_index",
+          "explanation",
+          "evidence"
+        ],
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "One of: design-intent, impact-surface, boundary, failure-mode."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The question: one or two short sentences in Simplified Chinese."
+          },
+          "options": {
+            "type": "array",
+            "description": "3 to 5 option texts without letters; each states only a result.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "answer_index": {
+            "type": "integer",
+            "description": "Zero-based index of the correct option in options."
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Why the correct option is right and the main wrong ones are wrong; refer to options by content, not by letter."
+          },
+          "evidence": {
+            "type": "array",
+            "description": "Up to 3 changed places that support the answer.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "line"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": "integer",
+                  "description": "New-side line number."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

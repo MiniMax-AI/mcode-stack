@@ -1,0 +1,128 @@
+<!doctype html>
+<!-- Source of docs/pr-review-overview.png. Render at 1280x950 CSS pixels with device scale 2,
+     for example with Playwright: page.setViewportSize({width:1280,height:950}); deviceScaleFactor 2; screenshot. -->
+<html><head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --coral: #ff7a59; --amber: #ffb347; --teal: #2ec4b6; --sky: #4cc9f0; --sun: #ffd166;
+    --ink: #eef1f7; --mute: #a9b1c6; --dim: #7c859b; --card: rgba(255,255,255,0.045); --line: rgba(255,255,255,0.09);
+  }
+  body { width: 1280px; height: 950px; overflow: hidden; font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+    background:
+      radial-gradient(900px 520px at 100% 0%, rgba(122, 44, 34, 0.55), transparent 70%),
+      radial-gradient(760px 520px at 0% 100%, rgba(30, 44, 98, 0.75), transparent 70%),
+      #0a0e18; }
+  .frame { position: absolute; inset: 0; padding: 46px 52px 40px; }
+  .pill { display: inline-block; border: 2px solid var(--coral); color: #ffd2c4; border-radius: 999px; padding: 6px 18px; font-size: 14px; letter-spacing: 3px; font-weight: 600; }
+  h1 { margin-top: 18px; font-size: 44px; line-height: 1.12; font-weight: 800; letter-spacing: -0.5px; }
+  h1 .hl { background: linear-gradient(90deg, var(--coral), var(--amber)); -webkit-background-clip: text; color: transparent; }
+  .sub { margin-top: 12px; font-size: 17.5px; color: var(--mute); line-height: 1.45; max-width: 1150px; }
+  .sub b { color: var(--ink); font-weight: 600; }
+  .grid { margin-top: 26px; display: grid; grid-template-columns: 220px 1fr; gap: 16px; }
+  .rules { grid-row: 1 / span 2; border-radius: 20px; padding: 20px 18px; background: linear-gradient(180deg, rgba(76,201,240,0.12), rgba(76,201,240,0.03)); border: 1.5px solid rgba(76,201,240,0.45); display: flex; flex-direction: column; gap: 10px; }
+  .rules h3 { font-size: 13px; letter-spacing: 2.5px; color: var(--sky); font-weight: 700; }
+  .rules .big { font-size: 21px; font-weight: 800; line-height: 1.2; }
+  .rules ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .rules li { font-size: 13.5px; color: var(--mute); line-height: 1.35; padding-left: 14px; position: relative; }
+  .rules li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--sky); }
+  .rules li b { color: var(--ink); font-weight: 600; }
+  .rules .note { margin-top: auto; font-size: 12.5px; color: var(--dim); line-height: 1.4; border-top: 1px solid var(--line); padding-top: 10px; }
+  .lane { border-radius: 20px; padding: 16px 18px 16px; background: var(--card); border: 1px solid var(--line); position: relative; }
+  .lane .head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .num { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #10131c; flex: none; transform: translateY(6px); }
+  .lane h2 { font-size: 19px; font-weight: 750; }
+  .lane .tag { font-size: 13px; color: var(--mute); }
+  .lane .tag code { color: var(--ink); }
+  .flow { display: flex; align-items: stretch; gap: 0; }
+  .step { flex: 1; border-radius: 13px; padding: 10px 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); font-size: 13.5px; line-height: 1.32; color: var(--ink); min-height: 58px; display: flex; flex-direction: column; justify-content: center; }
+  .step small { display: block; color: var(--mute); font-size: 12px; margin-top: 3px; line-height: 1.3; }
+  .step code, .tag code, .rules code, .foot code { font-family: "SF Mono", Menlo, monospace; font-size: 0.93em; }
+  .arrow { flex: none; width: 26px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; }
+  .agent .num { background: var(--coral); } .agent .arrow { color: var(--coral); } .agent { border-color: rgba(255,122,89,0.35); }
+  .agent .step.key { border-color: rgba(255,122,89,0.6); background: rgba(255,122,89,0.10); }
+  .ci .num { background: var(--teal); } .ci .arrow { color: var(--teal); } .ci { border-color: rgba(46,196,182,0.38); }
+  .ci .step.key { border-color: rgba(46,196,182,0.65); background: rgba(46,196,182,0.10); }
+  .ci .verdicts { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+  .ci .verdicts span { font-size: 11.5px; border-radius: 999px; padding: 2px 8px; border: 1px solid var(--line); color: var(--ink); background: rgba(255,255,255,0.06); }
+  .loopback { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .loopback span { font-size: 12.5px; color: var(--mute); border: 1px dashed rgba(46,196,182,0.45); border-radius: 999px; padding: 4px 11px; }
+  .loopback span b { color: var(--teal); font-weight: 700; }
+  .agentfacts span { border-color: rgba(255,122,89,0.45); }
+  .agentfacts span b { color: var(--coral); }
+  .hosts { position: absolute; right: 18px; top: 16px; display: flex; gap: 6px; }
+  .hosts span { font-size: 11.5px; letter-spacing: 0.4px; padding: 3px 9px; border-radius: 999px; background: rgba(46,196,182,0.14); border: 1px solid rgba(46,196,182,0.45); color: #c9fff8; }
+  .tune { grid-column: 1 / span 2; border-color: rgba(255,209,102,0.38); }
+  .tune .num { background: var(--sun); } .tune .arrow { color: var(--sun); }
+  .tune .step.key { border-color: rgba(255,209,102,0.6); background: rgba(255,209,102,0.09); }
+  .feed { position: absolute; left: 96px; top: -17px; font-size: 12px; color: #ffe3a3; background: #1b1a17; border: 1px solid rgba(255,209,102,0.5); border-radius: 999px; padding: 3px 10px; }
+  .foot { margin-top: 14px; font-size: 13px; color: var(--dim); text-align: center; }
+  .foot b { color: var(--mute); }
+</style></head>
+<body><div class="frame">
+  <span class="pill">MCODE REVIEW</span>
+  <h1>PR review that has to <span class="hl">prove its findings</span></h1>
+  <p class="sub">The same rules run in your agent and in CI. A second pass tries to refute every blocker, <b>a script &mdash; not a model &mdash; decides the verdict</b>, every finding is a thread people can answer, and the reviewer <b>tunes itself on your own history</b>.</p>
+
+  <div class="grid">
+    <div class="rules">
+      <h3>SHARED RULES</h3>
+      <div class="big">One rule set, two places it runs</div>
+      <ul>
+        <li><b>Severity</b> P0&ndash;P3 with real examples</li>
+        <li><b>Evidence ladder</b>: no file:line, no finding; blocking needs a traced failure</li>
+        <li><b>6 review directions</b>: behavior, contracts, security, cross-feature, duplication, general</li>
+        <li><b>Your repo&rsquo;s rules</b>: <code>.mcode-review.json</code> risk paths, <code>.mcode-review.md</code> known pitfalls</li>
+      </ul>
+      <div class="note">Read from the merge base in CI, so a PR can&rsquo;t rewrite the rules that review it.</div>
+    </div>
+
+    <div class="lane agent">
+      <div class="head"><span class="num">1</span><h2>In your agent</h2><span class="tag">before you ask anyone &middot; no setup &middot; your model &middot; posts nothing</span></div>
+      <div class="flow">
+        <div class="step">Write the change</div><div class="arrow">&rarr;</div>
+        <div class="step key"><code>pr-review</code> your branch<small>or &ldquo;review PR 123&rdquo;</small></div><div class="arrow">&rarr;</div>
+        <div class="step">Fix what it finds</div><div class="arrow">&rarr;</div>
+        <div class="step key"><code>pr-description</code><small>why, rollback, how verified</small></div><div class="arrow">&rarr;</div>
+        <div class="step">Open the PR</div>
+      </div>
+      <div class="loopback agentfacts">
+        <span><b>GitHub &amp; GitLab</b> PRs, by branch or by number</span>
+        <span><b>Your repo&rsquo;s rules</b> apply here too</span>
+        <span><b>MiniMax Code</b> &middot; Claude Code &middot; Codex</span>
+      </div>
+    </div>
+
+    <div class="lane ci">
+      <div class="hosts"><span>GitHub Actions</span><span>GitLab CI</span></div>
+      <div class="head"><span class="num">2</span><h2>In CI, on every push</h2><span class="tag">one workflow file &middot; MiniMax Code CLI</span></div>
+      <div class="flow">
+        <div class="step">Size it up<small>tier S&ndash;XL from the net diff &amp; risk paths</small></div><div class="arrow">&rarr;</div>
+        <div class="step key">Review in parallel<small>1 direction, or 5 for big PRs</small></div><div class="arrow">&rarr;</div>
+        <div class="step key">Try to refute it<small>a verifier re-checks every P0/P1</small></div><div class="arrow">&rarr;</div>
+        <div class="step key">Script decides<div class="verdicts"><span>pass</span><span>request changes</span><span>needs a person</span></div></div><div class="arrow">&rarr;</div>
+        <div class="step">Summary + one thread per finding<small>optional author quiz</small></div><div class="arrow">&rarr;</div>
+        <div class="step">People answer &amp; resolve<small>resolved = dismissed for good</small></div>
+      </div>
+      <div class="loopback">
+        <span><b>&#x21bb; Next push</b> re-reviews only files whose net diff changed</span>
+        <span><b>Never re-asks</b> a question already in a thread</span>
+        <span><b>3 blocking rounds</b> &rarr; hand it to a person</span>
+      </div>
+    </div>
+
+    <div class="lane tune">
+      <span class="feed">&uarr; approved changes update the shared rules</span>
+      <div class="head"><span class="num">3</span><h2>It tunes itself, weekly</h2><span class="tag"><code>pr-review-tuning</code> &middot; nothing changes until you approve</span></div>
+      <div class="flow">
+        <div class="step">Measure the bot on your PRs<small>threads per PR, replies, unanswered at merge, cost</small></div><div class="arrow">&rarr;</div>
+        <div class="step key">Find noise &amp; misses<small>fix PRs that name the PR that broke it</small></div><div class="arrow">&rarr;</div>
+        <div class="step">Propose &le; 3 rule changes<small>effect on each goal, risk</small></div><div class="arrow">&rarr;</div>
+        <div class="step key">Backtest on past PRs<small>read-only, with a token budget</small></div><div class="arrow">&rarr;</div>
+        <div class="step">Independent re-check<small>numbers recomputed by a verifier</small></div><div class="arrow">&rarr;</div>
+        <div class="step key">You approve &rarr; rules PR</div>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Open source &middot; MIT &middot; <b>stacks/jiachen</b> in MiniMax-AI/mcode-stack &middot; works in MiniMax Code, Claude Code and Codex</p>
+</div></body></html>

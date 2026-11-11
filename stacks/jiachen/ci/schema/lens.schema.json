@@ -1,0 +1,144 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "findings",
+    "needs_human",
+    "claims"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "type",
+          "class",
+          "title",
+          "body",
+          "path",
+          "line",
+          "symbol",
+          "evidence_level",
+          "introduced",
+          "suggestion",
+          "related_paths"
+        ],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "One of: P0, P1, P2, P3."
+          },
+          "type": {
+            "type": "string",
+            "description": "One of: defect, leftover, maintainability."
+          },
+          "class": {
+            "type": "string",
+            "description": "One of: behavior-regression, error-handling, fail-open-violation, retry-semantics, concurrency, lifecycle-resource, persistence-migration, data-loss, contract-break, config-default, compat-rollout, security, permission-auth, injection, parallel-impl-missed, duplicate-implementation, over-engineering, cross-feature-impact, performance, ui-layout, test-gap, observability, other."
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "evidence_level": {
+            "type": "integer",
+            "description": "One of: 1, 2, 3, 4, 5."
+          },
+          "introduced": {
+            "type": "string",
+            "description": "One of: this_mr, pre_existing, unknown."
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "related_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "needs_human": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "title",
+          "why",
+          "questions",
+          "paths"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "One of: design_direction, weak_evidence_high_impact, background_job, deny_list_or_allowlist, deploy_prerequisite, large_feature, other."
+          },
+          "title": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "One of: verified, refuted, unverified."
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

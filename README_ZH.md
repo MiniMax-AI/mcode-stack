@@ -118,7 +118,7 @@ MiniMax Code 会自动发现这几个目录里的 Skill（每个 Skill 一个子
 | | [`taste-to-checks`](stacks/ronny/skills/taste-to-checks/SKILL.md) | 同样的意见提了两次，就写成测试、lint、hook 或 CI |
 | | [`engineering-emergency-changes`](stacks/ronny/skills/engineering-emergency-changes/SKILL.md) | 判断 hotfix 是不是真紧急，紧急时怎么快审又不丢质量 |
 
-上表是 [`stacks/ronny`](stacks/ronny/) 的内容。[`stacks/jiachen`](stacks/jiachen/) 里还有：[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md) 找出你总在给 agent 当「人工环节」的那些循环，帮你从里面抽身；[`making-content`](stacks/jiachen/skills/making-content/SKILL.md) 把笔记和素材做成小红书图文和竖版短视频。
+上表是 [`stacks/ronny`](stacks/ronny/) 的内容。[`stacks/jiachen`](stacks/jiachen/) 里有 **MCode Review**：一套要拿出证据的 PR review，同一套规则既能让 agent 在本地跑（[`pr-review`](stacks/jiachen/skills/pr-review/SKILL.md)），也能接进 GitHub 或 GitLab 的 CI；结论由脚本给出，不由模型决定；每周还有一轮自我迭代（[`pr-review-tuning`](stacks/jiachen/skills/pr-review-tuning/SKILL.md)），用你自己的 PR 调规则。另外还有：[`lifting-loops`](stacks/jiachen/skills/lifting-loops/SKILL.md) 找出你总在给 agent 当「人工环节」的那些循环，帮你从里面抽身；[`making-content`](stacks/jiachen/skills/making-content/SKILL.md) 把笔记和素材做成小红书图文和竖版短视频。
 
 [`stacks/req-tpm`](stacks/req-tpm/README_ZH.md) 是一份可选的需求管理 stack：谁提的产品或技术需求，谁就和自己的 agent 一起当这条需求的 TPM。受理时先追问该不该做，写死可衡量的预期效果；优先级交给负责人拍板；记下方案决策；按节奏跟进，停滞的显式标出来；上线前过检查项；最后拿证据对照预期效果才关闭。需求正文放飞书文档，状态和流转放飞书项目（Meegle）。目前是 v0，需要 `meegle` 和 `lark-cli`，并先在自己的 Meegle 空间里查一遍字段和状态，见 [`stacks/req-tpm/README_ZH.md`](stacks/req-tpm/README_ZH.md)。
 
@@ -156,7 +156,7 @@ AI 写代码越来越快，真正拉开差距的，是围绕 agent 的那一圈�
 
 ```text
 stacks/ronny/               MiniMax Code 研发负责人 Ronny 的日常工作流，第一份，也是目前最完整的一份
-stacks/jiachen/             Jiachen 的工作流：把自己从 agent 的循环里解放出来，以及把笔记做成图文和短视频
+stacks/jiachen/             Jiachen 的工作流：MCode Review（本地和 CI 里都能跑的 PR review）、把自己从 agent 的循环里解放出来、把笔记做成图文和短视频
 stacks/req-tpm/             可选：需求提出人和自己的 agent 一起当这条需求的 TPM（正文在飞书文档，状态在 Meegle），v0
 stacks/youfang/             Youfang 的工作流：把架构讲解做成「神奇移动」演示，四种风格可选
 stacks/<name>/              每位成员一个目录，欢迎团队同事把自己的也放进来
